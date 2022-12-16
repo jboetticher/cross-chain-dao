@@ -23,16 +23,61 @@ simplicity's sake.
 
 // I think the current gameplan is to make our own IVotes smart contract
 
-contract CrossChainDAO is Governor, GovernorSettings, GovernorCountingSimple, GovernorVotes, GovernorVotesQuorumFraction {
+contract CrossChainDAO is
+    Governor,
+    GovernorSettings,
+    GovernorCountingSimple,
+    GovernorVotes,
+    GovernorVotesQuorumFraction
+{
     constructor(IVotes _token)
         Governor("Moonbeam Example Cross Chain DAO")
-        GovernorSettings(1 /* 1 block */, 5 /* 5 block */, 0)
+        GovernorSettings(
+            1, /* 1 block voting delay */
+            5, /* 5 block voting period */
+            0 /* 0 block proposal threshold */
+        )
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4)
     {}
 
+    // These 3 functions allows the IVotes implementation to specify which accounts are which
+    function castVoteCrossChain(
+        uint256 proposalId,
+        address account,
+        uint8 support
+    ) public {
+        require(_msgSender() == address(token));
+        _castVote(proposalId, account, support, "");
+    }
+
+    function castVoteWithReasonCrossChain(
+        uint256 proposalId,
+        address account,
+        uint8 support,
+        string calldata reason
+    ) public {
+        require(_msgSender() == address(token));
+        _castVote(proposalId, account, support, reason);
+    }
+
+    function castVoteWithReasonAndParamsCrossChain(
+        uint256 proposalId,
+        address account,
+        uint8 support,
+        string calldata reason,
+        bytes calldata params
+    ) public {
+        require(_msgSender() == address(token));
+        _castVote(proposalId, account, support, reason, params);
+    }
+
     // The following functions are overrides required by Solidity.
 
+    /**
+     * @dev Delay, in number of block, between the proposal is created and the vote starts. This can be increassed to
+     * leave time for users to buy voting power, or delegate it, before the voting of a proposal starts.
+     */
     function votingDelay()
         public
         view
@@ -42,6 +87,12 @@ contract CrossChainDAO is Governor, GovernorSettings, GovernorCountingSimple, Go
         return super.votingDelay();
     }
 
+    /**
+     * @dev Delay, in number of blocks, between the vote start and vote ends.
+     *
+     * NOTE: The {votingDelay} can delay the start of the vote. This must be considered when setting the voting
+     * duration compared to the voting delay.
+     */
     function votingPeriod()
         public
         view

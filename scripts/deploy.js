@@ -7,18 +7,16 @@
 const hre = require("hardhat");
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  // Deploy the IVotes implementation
+  const CrossChainDAOToken = await hre.ethers.getContractFactory("CrossChainDAOToken");
+  const hundredTokens = hre.ethers.utils.parseEther("100");
+  const token = await CrossChainDAOToken.deploy(hundredTokens);
+  console.log("CrossChainDAOToken deployed to: " + token.address);
 
-  const lockedAmount = hre.ethers.utils.parseEther("1");
-
-  const Lock = await hre.ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-  await lock.deployed();
-
-  console.log("Lock with 1 ETH deployed to:", lock.address);
+  // Now deploy the cross-chain token
+  const CrossChainDAO = await hre.ethers.getContractFactory("CrossChainDAO");
+  const dao = await CrossChainDAO.deploy(token.address);
+  console.log("CrossChainDAO deployed to: " + dao.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -3,12 +3,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
-contract CrossChainToken is ERC20Votes {
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        uint256 _initialSupply
-    ) ERC20(_name, _symbol) ERC20Permit(_name) {
+contract CrossChainDAOToken is ERC20Votes {
+    constructor(uint256 _initialSupply)
+        ERC20("Cross Chain DAO Token", "CCDT")
+        ERC20Permit("Cross Chain DAO Token")
+    {
         _mint(msg.sender, _initialSupply);
     }
 
