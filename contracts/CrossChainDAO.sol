@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
+import "./LayerZero/lzApp/NonblockingLzApp.sol";
 
 /* 
 ~~~~~~~ ON OPENZEPPELIN ~~~~~~
@@ -28,9 +29,10 @@ contract CrossChainDAO is
     GovernorSettings,
     GovernorCountingSimple,
     GovernorVotes,
-    GovernorVotesQuorumFraction
+    GovernorVotesQuorumFraction,
+    NonblockingLzApp
 {
-    constructor(IVotes _token)
+    constructor(IVotes _token, address lzEndpoint)
         Governor("Moonbeam Example Cross Chain DAO")
         GovernorSettings(
             1, /* 1 block voting delay */
@@ -39,37 +41,17 @@ contract CrossChainDAO is
         )
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4)
+        NonblockingLzApp(lzEndpoint)
     {}
 
-    // These 3 functions allows the IVotes implementation to specify which accounts are which
-    function castVoteCrossChain(
-        uint256 proposalId,
-        address account,
-        uint8 support
-    ) public {
-        require(_msgSender() == address(token));
-        _castVote(proposalId, account, support, "");
-    }
-
-    function castVoteWithReasonCrossChain(
-        uint256 proposalId,
-        address account,
-        uint8 support,
-        string calldata reason
-    ) public {
-        require(_msgSender() == address(token));
-        _castVote(proposalId, account, support, reason);
-    }
-
-    function castVoteWithReasonAndParamsCrossChain(
-        uint256 proposalId,
-        address account,
-        uint8 support,
-        string calldata reason,
-        bytes calldata params
-    ) public {
-        require(_msgSender() == address(token));
-        _castVote(proposalId, account, support, reason, params);
+    function _nonblockingLzReceive(
+        uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
+        bytes memory _payload
+    ) internal override {
+        // Decode from the bytes if they are voting. You probably don't have to implement anything else for the tutorial
+        // Some options are: proposal, vote, vote with reason, vote with reason and params, cancel, etc...
     }
 
     // The following functions are overrides required by Solidity.
