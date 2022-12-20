@@ -4,8 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/governance/Governor.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
-import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
-import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
+import "./CrossChainGovernorVotes.sol";
 import "./LayerZero/lzApp/NonblockingLzApp.sol";
 
 /* 
@@ -28,30 +27,124 @@ contract CrossChainDAO is
     Governor,
     GovernorSettings,
     GovernorCountingSimple,
-    GovernorVotes,
-    GovernorVotesQuorumFraction,
+    CrossChainGovernorVotes,
+    CrossChainGovernorVotesQuorumFraction,
     NonblockingLzApp
 {
-    constructor(IVotes _token, address lzEndpoint)
+    constructor(
+        IVotes _token,
+        address lzEndpoint,
+        uint16[] memory _spokeChains
+    )
         Governor("Moonbeam Example Cross Chain DAO")
         GovernorSettings(
             1, /* 1 block voting delay */
             5, /* 5 block voting period */
             0 /* 0 block proposal threshold */
         )
-        GovernorVotes(_token)
-        GovernorVotesQuorumFraction(4)
+        CrossChainGovernorVotes(_token)
+        CrossChainGovernorVotesQuorumFraction(4)
         NonblockingLzApp(lzEndpoint)
-    {}
+    {
+        spokeChains = _spokeChains;
+    }
+
+    struct ExternalVotingData {
+        uint256 quorum;
+        uint256 voteWeight;
+        bool initialized;
+    }
+
+    // The lz-chain IDs that the DAO expects to receive data from during the collection phase
+    uint16[] spokeChains;
+
+    // Whether or not the DAO finished the collection phase. It would be more efficient to add Collection as a status
+    // in the Governor interface, but that would require editing the source file. It is a bit out of scope to completely
+    // refactor the OpenZeppelin governance contract for cross-chain action!
+    mapping(uint256 => bool) collectionFinished;
+    mapping(uint256 => bool) collectionStarted;
+
+    // Maps to a list of external voting
+    mapping(uint256 => mapping(uint16 => ExternalVotingData)) voting;
+
+    // How many blocks to wait until the collection phase is marked as finished, regardless of data received.
+    uint16 collectionPhaseWaitingPeriod;
 
     function _nonblockingLzReceive(
         uint16 _srcChainId,
-        bytes memory _srcAddress,
-        uint64 _nonce,
+        bytes memory /*_srcAddress*/,
+        uint64 /*_nonce*/,
         bytes memory _payload
     ) internal override {
-        // Decode from the bytes if they are voting. You probably don't have to implement anything else for the tutorial
-        // Some options are: proposal, vote, vote with reason, vote with reason and params, cancel, etc...
+        (uint16 option, bytes memory payload) = abi.decode(_payload, (uint16, bytes));
+
+        // Some options for cross-chain actions are: propose, vote, vote with reason, vote with reason and params, cancel, etc...
+        if(option == 0) {
+            onReceiveExternalVotingData(_srcChainId, payload);
+        }
+        else if(option == 1) {
+            // TODO: Feel free to put your own cross-chain actions...
+        }
+        else {
+            // ...
+        }
+    }
+
+    function onReceiveExternalVotingData(uint16 _srcChainId, bytes memory payload) internal virtual {
+
+    }
+
+    // Ensures that there is no execution if the collection phase is unfinished
+    function _beforeExecute(
+        uint256 proposalId,
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        bytes32 descriptionHash
+    ) internal override {
+        require(
+            collectionFinished[proposalId],
+            "Collection phase for this proposal is unfinished!"
+        );
+        super._beforeExecute(
+            proposalId,
+            targets,
+            values,
+            calldatas,
+            descriptionHash
+        );
+    }
+
+    // Marks a collection phase as true if all of the
+    function finishCollectionPhase(uint256 proposalId) external {
+        bool phaseFinished = true;
+        for (uint16 i = 0; i < spokeChains.length && phaseFinished; i++) {
+            phaseFinished = voting[proposalId][spokeChains[i]].initialized;
+        }
+        if (phaseFinished) {
+            collectionFinished[proposalId] = true;
+        }
+    }
+
+    function requestCollections(uint256 proposalId) public payable {
+        require(
+            collectionStarted[proposalId],
+            "Collection phase for this proposal has already finished!"
+        );
+
+        // Sends an empty message to each of the aggregators. If they receive a message at all,
+        // it is their cue to send data back
+        for (uint16 i = 0; i < spokeChains.length; i++) {
+            bytes memory payload = abi.encode(0);
+            _lzSend({
+                _dstChainId: spokeChains[i],
+                _payload: payload,
+                _refundAddress: payable(msg.sender),
+                _zroPaymentAddress: address(0x0),
+                _adapterParams: bytes(""),
+                _nativeFee: 0.1 ether
+            });
+        }
     }
 
     // The following functions are overrides required by Solidity.
@@ -87,7 +180,7 @@ contract CrossChainDAO is
     function quorum(uint256 blockNumber)
         public
         view
-        override(IGovernor, GovernorVotesQuorumFraction)
+        override(IGovernor, CrossChainGovernorVotesQuorumFraction)
         returns (uint256)
     {
         return super.quorum(blockNumber);
