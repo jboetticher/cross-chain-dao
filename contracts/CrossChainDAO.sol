@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
 import "./CrossChainGovernorVotes.sol";
 import "./LayerZero/lzApp/NonblockingLzApp.sol";
+import "./IConvertBlocks.sol";
 
 /* 
 ~~~~~~~ ON OPENZEPPELIN ~~~~~~
@@ -29,7 +30,8 @@ contract CrossChainDAO is
     GovernorCountingSimple,
     CrossChainGovernorVotes,
     CrossChainGovernorVotesQuorumFraction,
-    NonblockingLzApp
+    NonblockingLzApp,
+    BlockConverter
 {
     constructor(
         IVotes _token,
@@ -72,26 +74,40 @@ contract CrossChainDAO is
 
     function _nonblockingLzReceive(
         uint16 _srcChainId,
-        bytes memory /*_srcAddress*/,
-        uint64 /*_nonce*/,
+        bytes memory, /*_srcAddress*/
+        uint64, /*_nonce*/
         bytes memory _payload
     ) internal override {
-        (uint16 option, bytes memory payload) = abi.decode(_payload, (uint16, bytes));
+        (uint256 option, bytes memory payload) = abi.decode(
+            _payload,
+            (uint16, bytes)
+        );
 
         // Some options for cross-chain actions are: propose, vote, vote with reason, vote with reason and params, cancel, etc...
-        if(option == 0) {
+        if (option == 0) {
             onReceiveExternalVotingData(_srcChainId, payload);
-        }
-        else if(option == 1) {
+        } else if (option == 1) {
             // TODO: Feel free to put your own cross-chain actions...
-        }
-        else {
+        } else {
             // ...
         }
     }
 
-    function onReceiveExternalVotingData(uint16 _srcChainId, bytes memory payload) internal virtual {
-
+    function onReceiveExternalVotingData(
+        uint16 _srcChainId,
+        bytes memory payload
+    ) internal virtual {
+        (uint256 _proposalId, uint256 _quorum, uint256 _voteWeight) = abi
+            .decode(payload, (uint256, uint256, uint256));
+        if (voting[_proposalId][_srcChainId].initialized) {
+            revert("Already initialized!");
+        } else {
+            voting[_proposalId][_srcChainId] = ExternalVotingData(
+                _quorum,
+                _voteWeight,
+                true
+            );
+        }
     }
 
     // Ensures that there is no execution if the collection phase is unfinished
@@ -126,6 +142,7 @@ contract CrossChainDAO is
         }
     }
 
+    // Requests the voting data from all of the spoke chains
     function requestCollections(uint256 proposalId) public payable {
         require(
             collectionStarted[proposalId],
@@ -135,16 +152,48 @@ contract CrossChainDAO is
         // Sends an empty message to each of the aggregators. If they receive a message at all,
         // it is their cue to send data back
         for (uint16 i = 0; i < spokeChains.length; i++) {
-            bytes memory payload = abi.encode(0);
+            bytes memory payload = abi.encode(0, abi.encode(proposalId));
             _lzSend({
                 _dstChainId: spokeChains[i],
                 _payload: payload,
-                _refundAddress: payable(msg.sender),
+                _refundAddress: payable(address(this)),
                 _zroPaymentAddress: address(0x0),
                 _adapterParams: bytes(""),
                 _nativeFee: 0.1 ether
             });
         }
+    }
+
+    function propose(
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        string memory description
+    ) public virtual override returns (uint256) {
+        uint256 proposalId = super.propose(
+            targets,
+            values,
+            calldatas,
+            description
+        );
+
+        // Now send the proposal to all of the other chains
+        // You'll want to convert the current block into
+        for (uint16 i = 0; i < spokeChains.length; i++) {
+            uint256 bNumStart = convertBlocks(spokeChains[i], proposalSnapshot(proposalId));
+            uint256 bNumEnd = convertBlocks(spokeChains[i], proposalDeadline(proposalId));
+            bytes memory payload = abi.encode(1, abi.encode(proposalId, bNumStart, bNumEnd));
+            _lzSend({
+                _dstChainId: spokeChains[i],
+                _payload: payload,
+                _refundAddress: payable(address(this)),
+                _zroPaymentAddress: address(0x0),
+                _adapterParams: bytes(""),
+                _nativeFee: 0.1 ether
+            });
+        }
+
+        return proposalId;
     }
 
     // The following functions are overrides required by Solidity.
