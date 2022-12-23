@@ -7,15 +7,23 @@
 const hre = require("hardhat");
 
 async function main() {
-  // Deploy the IVotes implementation
-  const CrossChainDAOToken = await hre.ethers.getContractFactory("CrossChainDAOToken");
+  // Deploy the cross-chain token 
+  const VoteAggregator = await hre.ethers.getContractFactory("VoteAggregator");
   const hundredTokens = hre.ethers.utils.parseEther("100");
   const token = await CrossChainDAOToken.deploy(hundredTokens);
   console.log("CrossChainDAOToken deployed to: " + token.address);
 
-  // Now deploy the cross-chain token
+  // Lz Addresses
+  const addresses = {
+    "1287": "0xb23b28012ee92E8dE39DEb57Af31722223034747",
+    "4002": "0x7dcAD72640F835B0FA36EFD3D6d3ec902C7E5acf",
+    "43113": "0x93f54D755A063cE7bB9e6Ac47Eccc8e33411d706",
+  };
+  let lzAddress = addresses[hre.getChainId()];
+
+  // Now deploy the DAO
   const CrossChainDAO = await hre.ethers.getContractFactory("CrossChainDAO");
-  const dao = await CrossChainDAO.deploy(token.address);
+  const dao = await CrossChainDAO.deploy(token.address, lzAddress, [10112, 10106]); // fantom + avalanche
   console.log("CrossChainDAO deployed to: " + dao.address);
 }
 
