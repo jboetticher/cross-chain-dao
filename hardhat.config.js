@@ -11,7 +11,7 @@ module.exports = {
   settings: {
     optimizer: {
       enabled: true,
-      runs: 1,
+      runs: 1000,
     },
   },
   networks: {
@@ -69,7 +69,5 @@ module.exports = {
       default: 1,
     },
   },
-  etherscan: {
-    apiKey: etherscanApiKeys
-  }
+  etherscan: etherscanApiKeys
 };

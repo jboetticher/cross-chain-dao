@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./LayerZero/lzApp/NonblockingLzApp.sol";
 import "@openzeppelin/contracts/utils/Timers.sol";
 import "@openzeppelin/contracts/utils/Checkpoints.sol";
-import "./CrossChainDAOToken.sol";
+import "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
 // setTrustedRemote: the only contract that should be trusted is the DAO on the hub chain
 
@@ -18,14 +18,14 @@ contract VoteAggregator is NonblockingLzApp {
     constructor(
         uint16 _hubChain,
         address _endpoint,
-        CrossChainDAOToken _token
+        IVotes _token
     ) NonblockingLzApp(_endpoint) {
         hubChain = _hubChain;
         token = _token;
     }
 
     uint16 public immutable hubChain;
-    CrossChainDAOToken public immutable token;
+    IVotes public immutable token;
     uint256 private _quorumNumerator; // DEPRECATED
     mapping(uint256 => RemoteProposal) _proposals;
 
@@ -40,7 +40,6 @@ contract VoteAggregator is NonblockingLzApp {
         // bool canceled; TODO: implement cancelation
     }
 
-    // TODO: all of this
     function castVote(uint256 proposalId, uint8 support)
         public
         virtual
@@ -81,7 +80,6 @@ contract VoteAggregator is NonblockingLzApp {
 
         // Do 1 of 2 things:
         // 0. Begin a proposal on the local chain, with local block times
-        // TODO: this thing
         if (option == 0) {
             (uint256 proposalId, uint256 proposalStart, uint256 proposalEnd) = abi.decode(payload, (uint256, uint256, uint256));
             require(_proposals[proposalId].localVoteEnd == 0, "Proposal ID must be unique.");
@@ -101,7 +99,7 @@ contract VoteAggregator is NonblockingLzApp {
                 _nativeFee: 0.1 ether
             });
         }
-        // TODO: 2. Implement voting cancelation
+        // TODO: 2. Implement voting cancelation (out of scope for tutorial)
     }
 
     // The following code is copied from the Governor modules to replicate some of its logic
