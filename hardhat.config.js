@@ -2,17 +2,33 @@ require("@nomicfoundation/hardhat-toolbox");
 require("@nomiclabs/hardhat-etherscan");
 require('hardhat-deploy');
 require('./tasks');
+require('hardhat-contract-sizer');
 
 const { privateKey, etherscanApiKeys } = require('./secrets.json');
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  solidity: "0.8.15",
-  settings: {
-    optimizer: {
-      enabled: true,
-      runs: 1000,
-    },
+  solidity: {
+    compilers: [
+      {
+        version: "0.8.4",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200
+          }
+        }
+      },
+      {
+        version: "0.8.12",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200
+          }
+        }
+      }
+    ]
   },
   networks: {
     moonbase: {
@@ -51,7 +67,7 @@ module.exports = {
       accounts: [privateKey]
     },
     'fantom-testnet': {
-      url: `https://rpc.testnet.fantom.network/`,
+      url: `https://fantom-testnet.blastapi.io/adafb88b-6012-4705-8aed-eeabbeed35da`,
       chainId: 4002,
       accounts: [privateKey]
     },
