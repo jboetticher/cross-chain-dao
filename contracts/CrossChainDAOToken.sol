@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "./OFTVotes.sol";
 
 contract CrossChainDAOToken is ERC20Votes, OFTVotes {
-    constructor(uint256 _initialSupply)
-        OFTVotes("Cross Chain DAO Token", "CCDT", 0xb23b28012ee92E8dE39DEb57Af31722223034747)
+    constructor(uint256 _initialSupply, address _lzEndpoint)
+        OFTVotes("Cross Chain DAO Token", "CCDT", _lzEndpoint)
         ERC20Permit("Cross Chain DAO Token")
     {
         _mint(msg.sender, _initialSupply);
