@@ -28,7 +28,7 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
         // Wait for transactions
         console.log("Waiting for confirmations...");
         await ethers.provider.waitForTransaction(
-            deployment.deployTransaction.hash, 2
+            deployment.transactionHash, 2
         );
 
         // Attempt to verify
