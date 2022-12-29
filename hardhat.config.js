@@ -7,7 +7,13 @@ const { privateKey, etherscanApiKeys } = require('./secrets.json');
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  solidity: "0.8.9",
+  solidity: "0.8.15",
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 1,
+    },
+  },
   networks: {
     moonbase: {
       url: 'https://rpc.api.moonbase.moonbeam.network',

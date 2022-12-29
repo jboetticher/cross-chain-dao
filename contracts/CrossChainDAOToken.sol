@@ -4,7 +4,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "./OFTVotes.sol";
 
-contract CrossChainDAOToken is ERC20Votes, OFTVotes {
+// TODO: figure out why the contracts compiled into something so massive
+
+contract CrossChainDAOToken is OFTVotes {
     constructor(uint256 _initialSupply, address _lzEndpoint)
         OFTVotes("Cross Chain DAO Token", "CCDT", _lzEndpoint)
         ERC20Permit("Cross Chain DAO Token")

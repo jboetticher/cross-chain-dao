@@ -24,6 +24,8 @@ simplicity's sake.
 
 // I think the current gameplan is to make our own IVotes smart contract
 
+// TODO: figure out why the contracts compiled into something so massive
+
 contract CrossChainDAO is
     Governor,
     GovernorSettings,

@@ -6,3 +6,5 @@ The `CrossChainDAO.sol` file is the main logic. The `DAOSatellite.sol` contract 
 ```
 npx hardhat --network moonbase deploy --tags CrossChainDAOToken
 ```
+
+https://github.com/mudgen/transparent-contracts-erc1538/tree/master/contracts
