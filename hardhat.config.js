@@ -1,6 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomiclabs/hardhat-etherscan");
 require('hardhat-deploy');
+require('hardhat-deploy-ethers');
 require('./tasks');
 require('hardhat-contract-sizer');
 
@@ -85,5 +86,5 @@ module.exports = {
       default: 1,
     },
   },
-  etherscan: etherscanApiKeys
+  etherscan: etherscanApiKeys,
 };

@@ -3,8 +3,20 @@ This is an example of a cross-chain DAO. It follows a hub-and-spoke model.
 The `CrossChainDAO.sol` file is the main logic. The `DAOSatellite.sol` contract communicates across chains with the `CrossChainDAO.sol` smart contract.
 
 ## Deployment
+The following docs will be for deploying to hub chain Moonbase Alpha and spoke chain Fantom.
+
+### CrossChainDAOToken
+First thing to deploy is the CrossChainDAOToken, which determines the votes on each chain. 
+
 ```
-npx hardhat --network moonbase deploy --tags CrossChainDAOToken
+npx hardhat deploy --tags CrossChainDAOToken --network moonbase
+npx hardhat deploy --tags CrossChainDAOToken --network fantom-testnet
 ```
 
-https://github.com/mudgen/transparent-contracts-erc1538/tree/master/contracts
+Then you set them as trusted.
+
+```
+npx hardhat tokenSetTrustedRemote --network moonbase --target-network fantom-testnet
+npx hardhat tokenSetTrustedRemote --network fantom-testnet --target-network moonbase
+```
+
