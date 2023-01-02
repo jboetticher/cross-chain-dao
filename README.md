@@ -20,3 +20,15 @@ npx hardhat tokenSetTrustedRemote --network moonbase --target-network fantom-tes
 npx hardhat tokenSetTrustedRemote --network fantom-testnet --target-network moonbase
 ```
 
+### CrossChainDAO
+This only needs to be deployed once, since it expects to communicate with VoteAggregator contracts.  
+
+```
+npx hardhat deploy --tags CrossChainDAO --network moonbase
+```
+
+The setting trusted contracts section happens after deploying the VoteAggregator contracts.  
+
+### VoteAggregator
+Ok
+

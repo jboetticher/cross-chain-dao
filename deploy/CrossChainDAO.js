@@ -1,13 +1,18 @@
 const LZ_ENDPOINTS = require("../constants/layerzeroEndpoints.json");
 const CHAIN_IDS = require("../constants/chainIds.json");
+const { getDeploymentAddresses } = require("../utils/readStatic")
 
 module.exports = async function ({ deployments, getNamedAccounts }) {
     const { deploy, getNetworkName } = deployments
     const { deployer } = await getNamedAccounts()
 
-    // TODO: get the token if it's already been deployed on the current chain. Currently placeholder
     const placeholder = "0x0394c0EdFcCA370B20622721985B577850B0eb75";
+    const tokenAddr = getDeploymentAddresses(hre.network.name)["CrossChainDAOToken"];
     const lzEndpointAddress = LZ_ENDPOINTS[hre.network.name]
+
+    if(tokenAddr == null) {
+        throw new Error("CrossChainDAOToken has not been deployed yet!");
+    }
 
     // NOTE:    change this based on the network you want to use, but since this tutorial is made for
     //          Moonbeam, the hub chain will always be Moonbeam / Moonbase Alpha
