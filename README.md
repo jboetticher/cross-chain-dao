@@ -35,3 +35,10 @@ Now you ought to deploy the VoteAggregator smart contracts on the hub chains.
 ```
 npx hardhat deploy --tags VoteAggregator --network fantom-testnet
 ```
+
+Now both the DAO and the satellite VoteAggregators have to have their remote addresses trusted.  
+
+```
+npx hardhat daoSetTrustedRemote --network moonbase --target-network fantom-testnet
+npx hardhat voteAggSetTrustedRemote --network fantom-testnet
+```
