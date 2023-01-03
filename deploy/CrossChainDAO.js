@@ -1,12 +1,11 @@
 const LZ_ENDPOINTS = require("../constants/layerzeroEndpoints.json");
 const CHAIN_IDS = require("../constants/chainIds.json");
-const { getDeploymentAddresses } = require("../utils/readStatic")
+const { getDeploymentAddresses } = require("../utils/readStatic");
 
 module.exports = async function ({ deployments, getNamedAccounts }) {
     const { deploy, getNetworkName } = deployments
     const { deployer } = await getNamedAccounts()
 
-    const placeholder = "0x0394c0EdFcCA370B20622721985B577850B0eb75";
     const tokenAddr = getDeploymentAddresses(hre.network.name)["CrossChainDAOToken"];
     const lzEndpointAddress = LZ_ENDPOINTS[hre.network.name]
 
@@ -17,7 +16,7 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
     // NOTE:    change this based on the network you want to use, but since this tutorial is made for
     //          Moonbeam, the hub chain will always be Moonbeam / Moonbase Alpha
     const spokeChains = [ CHAIN_IDS["fantom-testnet"] ];
-    const args = [placeholder, lzEndpointAddress, spokeChains];
+    const args = [tokenAddr, lzEndpointAddress, spokeChains];
 
     console.log(`Deploying CrossChainDAO on ${getNetworkName()} with ${deployer}...`);
 

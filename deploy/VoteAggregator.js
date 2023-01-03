@@ -1,18 +1,18 @@
 const LZ_ENDPOINTS = require("../constants/layerzeroEndpoints.json");
 const CHAIN_IDS = require("../constants/chainIds.json");
+const { getDeploymentAddresses } = require("../utils/readStatic");
 
 module.exports = async function ({ deployments, getNamedAccounts }) {
     const { deploy, getNetworkName } = deployments
     const { deployer } = await getNamedAccounts()
 
-    // TODO: get the token if it's already been deployed on the current chain. Currently placeholder
-    const placeholder = "0x0394c0EdFcCA370B20622721985B577850B0eb75";
+    const voteToken = getDeploymentAddresses(hre.network.name)["CrossChainDAOToken"];
     const lzEndpointAddress = LZ_ENDPOINTS[hre.network.name]
 
     // NOTE:    change this based on the network you want to use, but since this tutorial is made for
     //          Moonbeam, the hub chain will always be Moonbeam / Moonbase Alpha
     const hubChain = CHAIN_IDS.moonbase;
-    const args = [hubChain, lzEndpointAddress, placeholder];
+    const args = [hubChain, lzEndpointAddress, voteToken];
 
     console.log(`Deploying VoteAggregator on ${getNetworkName()} with ${deployer}...`);
 
@@ -23,7 +23,6 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
             log: true,
             waitConfirmations: 1
         });
-        //console.log(deployment);
 
         // Wait for transactions
         console.log("Waiting for confirmations...");

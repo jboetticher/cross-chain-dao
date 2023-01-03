@@ -6,7 +6,7 @@ The `CrossChainDAO.sol` file is the main logic. The `DAOSatellite.sol` contract 
 The following docs will be for deploying to hub chain Moonbase Alpha and spoke chain Fantom.
 
 ### CrossChainDAOToken
-First thing to deploy is the CrossChainDAOToken, which determines the votes on each chain. 
+First thing to deploy is the CrossChainDAOToken, which determines the votes on each chain.  
 
 ```
 npx hardhat deploy --tags CrossChainDAOToken --network moonbase
@@ -30,5 +30,8 @@ npx hardhat deploy --tags CrossChainDAO --network moonbase
 The setting trusted contracts section happens after deploying the VoteAggregator contracts.  
 
 ### VoteAggregator
-Ok
+Now you ought to deploy the VoteAggregator smart contracts on the hub chains.  
 
+```
+npx hardhat deploy --tags VoteAggregator --network fantom-testnet
+```

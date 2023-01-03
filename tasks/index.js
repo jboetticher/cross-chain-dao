@@ -18,3 +18,8 @@ task("voteAggSetTrustedRemote",
     "Set up the trusted remote addresses for a VoteAggregator.",
     require("./voteAggSetTrustedRemote")
 )
+
+task("readTokenData", 
+    "Reads data about the CrossChainDAOToken.",
+    require("./readTokenData")
+);
