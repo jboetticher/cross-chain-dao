@@ -22,4 +22,15 @@ task("voteAggSetTrustedRemote",
 task("readTokenData", 
     "Reads data about the CrossChainDAOToken.",
     require("./readTokenData")
+).addParam(
+    "acc",
+    "the account to read"
+)
+
+task("delegateVotes",
+    "Delegates token votes to an account.",
+    require("./delegateVotes")
+).addParam(
+    "acc",
+    "the account to delegate votes to"
 );

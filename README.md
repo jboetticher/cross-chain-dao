@@ -20,6 +20,12 @@ npx hardhat tokenSetTrustedRemote --network moonbase --target-network fantom-tes
 npx hardhat tokenSetTrustedRemote --network fantom-testnet --target-network moonbase
 ```
 
+You should also delegate votes to yourself so that you can do votes.  
+
+```
+npx hardhat delegateVotes --network dev-node --acc 0x6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b
+```
+
 ### CrossChainDAO
 This only needs to be deployed once, since it expects to communicate with VoteAggregator contracts.  
 
@@ -41,4 +47,11 @@ Now both the DAO and the satellite VoteAggregators have to have their remote add
 ```
 npx hardhat daoSetTrustedRemote --network moonbase --target-network fantom-testnet
 npx hardhat voteAggSetTrustedRemote --network fantom-testnet
+```
+
+## Testing
+Deploy the cross chain DAO token:
+```
+npx hardhat deploy --network dev-node --tags CrossChainDAOToken
+npx hardhat readTokenData --network dev-node --acc 0x6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b
 ```

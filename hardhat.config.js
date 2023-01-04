@@ -74,7 +74,7 @@ module.exports = {
     },
     'dev-node': {
       url: 'http://127.0.0.1:9933',
-      chainId: 1288,
+      chainId: 1281,
       accounts: ["0x99b3c12287537e38c90a9219d4cb074a89a16e9cdb20bf85728ebd97c343e342"]
     }
   },
