@@ -1,17 +1,15 @@
-const CHAIN_ID = require("../constants/chainIds.json")
-const { getDeploymentAddresses } = require("../utils/readStatic")
 
 module.exports = async function (taskArgs, hre) {
-    const { proposalId, support } = taskArgs;
+    const { proposalid, support } = taskArgs;
 
-    if (hre.network.name == "moonbase") {
+    if (hre.network.name == "moonbase" || hre.network.name == "dev-node") {
         // Get local contract instance
         const dao = await ethers.getContract("CrossChainDAO")
         console.log(`[source] CrossChainDAO.address: ${dao.address}`);
 
         // Delegate votes to task args
-        let tx = await (await token.propose([], [], [], taskArgs.desc)).wait()
-        console.log(`✅ [${hre.network.name}] CrossChainDAO.castVote(0, 10)`)
+        let tx = await (await dao.castVote(proposalid, support)).wait()
+        console.log(`✅ [${hre.network.name}] CrossChainDAO.castVote(${proposalid}, ${support})`)
         console.log(`...tx: ${tx.transactionHash}`);
     }
     else {
@@ -20,8 +18,8 @@ module.exports = async function (taskArgs, hre) {
         console.log(`[source] VoteAggregator.address: ${dao.address}`);
 
         // Delegate votes to task args
-        let tx = await (await token.propose([], [], [], taskArgs.desc)).wait()
-        console.log(`✅ [${hre.network.name}] VoteAggregator.propose(${taskArgs.acc})`)
+        let tx = await (await token.castVote(proposalid, support)).wait()
+        console.log(`✅ [${hre.network.name}] VoteAggregator.castVote(${proposalid}, ${support})`)
         console.log(`...tx: ${tx.transactionHash}`);
     }
 }

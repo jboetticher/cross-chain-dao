@@ -42,3 +42,14 @@ task("newEmptyProposal",
     "desc",
     "the description of the empty proposal"
 );
+
+task("vote",
+    "Votes on a proposal.",
+    require("./vote")
+).addParam(
+    "proposalid",
+    "the id of the empty proposal"
+).addParam(
+    "support",
+    "0 for con, 1 for pro"
+)
