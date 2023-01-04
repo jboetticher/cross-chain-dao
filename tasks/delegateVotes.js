@@ -8,6 +8,6 @@ module.exports = async function (taskArgs, hre) {
 
     // Delegate votes to task args
     let tx = await (await token.delegate(taskArgs.acc)).wait()
-    console.log(`✅ [${hre.network.name}] CrossChainDAO.setTrustedRemote(${taskArgs.acc})`)
+    console.log(`✅ [${hre.network.name}] CrossChainDAOToken.delegate(${taskArgs.acc})`)
     console.log(`...tx: ${tx.transactionHash}`);
 }

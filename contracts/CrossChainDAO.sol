@@ -42,9 +42,9 @@ contract CrossChainDAO is
     )
         Governor("Moonbeam Example Cross Chain DAO")
         GovernorSettings(
-            1, /* 1 block voting delay */
-            5, /* 5 block voting period */
-            0 /* 0 block proposal threshold */
+            1,  /* 1 block voting delay */
+            50, /* 5 block voting period */
+            0   /* 0 block proposal threshold */
         )
         CrossChainGovernorVotes(_token)
         CrossChainGovernorVotesQuorumFraction(4)
@@ -89,7 +89,7 @@ contract CrossChainDAO is
         if (option == 0) {
             onReceiveExternalVotingData(_srcChainId, payload);
         } else if (option == 1) {
-            // TODO: Feel free to put your own cross-chain actions...
+            // TODO: Feel free to put your own cross-chain actions (propose, execute, etc)...
         } else {
             // ...
         }
@@ -178,6 +178,9 @@ contract CrossChainDAO is
             calldatas,
             description
         );
+        return proposalId;
+
+        // TODO: figure out the issue! Because super.propose worked but something wrong is below
 
         // Now send the proposal to all of the other chains
         // You'll want to convert the current block into

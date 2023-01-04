@@ -1,0 +1,76 @@
+{
+  "address": "0x825458a1243c5a4f678f0151555c373cF48e4066",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "increment",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "incrementer",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xe565bc3342755bf8937d79417ba7d4412fdce73325ef8e2f3e53b868f3d17a5c",
+  "receipt": {
+    "to": null,
+    "from": "0x0394c0EdFcCA370B20622721985B577850B0eb75",
+    "contractAddress": "0x825458a1243c5a4f678f0151555c373cF48e4066",
+    "transactionIndex": 0,
+    "gasUsed": "97245",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xe822acfb6f61d4fc827defc1640f544394b32ac19d4594046a05ea5f2693fc71",
+    "transactionHash": "0xe565bc3342755bf8937d79417ba7d4412fdce73325ef8e2f3e53b868f3d17a5c",
+    "logs": [],
+    "blockNumber": 3487716,
+    "cumulativeGasUsed": "97245",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "fd8bbea8c4372e23493be03604771c99",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.12+commit.f00d7308\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"increment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"incrementer\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/SimpleIncrementer.sol\":\"SimpleIncrementer\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/SimpleIncrementer.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity >=0.8.0;\\n\\ncontract SimpleIncrementer {\\n    uint256 public incrementer;\\n\\n    function increment() external {\\n        incrementer += 1;\\n    }\\n}\",\"keccak256\":\"0xf739a23c485526f49d0c22330b7145acba487523c1f4500d678ab210fbe707b5\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5060cb8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80631da5772d146037578063d09de08a146051575b600080fd5b603f60005481565b60405190815260200160405180910390f35b60576059565b005b6001600080828254606991906070565b9091555050565b60008219821115609057634e487b7160e01b600052601160045260246000fd5b50019056fea2646970667358221220ee2e53bd4cbb989c5b200ba0398a62a109ffcf5d29decaa11f5f0bed754ecc1564736f6c634300080c0033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c80631da5772d146037578063d09de08a146051575b600080fd5b603f60005481565b60405190815260200160405180910390f35b60576059565b005b6001600080828254606991906070565b9091555050565b60008219821115609057634e487b7160e01b600052601160045260246000fd5b50019056fea2646970667358221220ee2e53bd4cbb989c5b200ba0398a62a109ffcf5d29decaa11f5f0bed754ecc1564736f6c634300080c0033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 3,
+        "contract": "contracts/SimpleIncrementer.sol:SimpleIncrementer",
+        "label": "incrementer",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

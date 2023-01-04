@@ -20,7 +20,8 @@ npx hardhat tokenSetTrustedRemote --network moonbase --target-network fantom-tes
 npx hardhat tokenSetTrustedRemote --network fantom-testnet --target-network moonbase
 ```
 
-You should also delegate votes to yourself so that you can do votes.  
+You should also delegate votes to yourself so that you can do votes. This example uses the dev node's account,
+but you should use whatever your account address is.  
 
 ```
 npx hardhat delegateVotes --network dev-node --acc 0x6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b
@@ -49,9 +50,26 @@ npx hardhat daoSetTrustedRemote --network moonbase --target-network fantom-testn
 npx hardhat voteAggSetTrustedRemote --network fantom-testnet
 ```
 
-## Testing
+### SimpleIncrementer
+This is an optional contract, but you can use it for testing out proposals and using the newEmptyProposal task.  
+
+```
+npx hardhat deploy --tags SimpleIncrementer --network moonbase
+```
+
+## Begin a Proposal & Vote
+You can begin a proposal on the hub chain.  
+
+```
+npx hardhat newEmptyProposal --desc "My first cross-chain proposal!"
+```
+
+## Testing Smart Deployment on Dev Node
 Deploy the cross chain DAO token:
 ```
 npx hardhat deploy --network dev-node --tags CrossChainDAOToken
 npx hardhat readTokenData --network dev-node --acc 0x6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b
+npx hardhat newEmptyProposal --network dev-node --desc "This is a proposal"
 ```
+
+Can't do any cross-chain functionality, but at least you get to figure out if the deployment works.
