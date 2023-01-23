@@ -1,5 +1,6 @@
 const LZ_ENDPOINTS = require("../constants/layerzeroEndpoints.json");
 const CHAIN_IDS = require("../constants/chainIds.json");
+const TARGET_SECONDS_PER_BLOCK = require("../constants/chainIds.json");
 const { getDeploymentAddresses } = require("../utils/readStatic");
 
 module.exports = async function ({ deployments, getNamedAccounts }) {
@@ -12,7 +13,7 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
     // NOTE:    change this based on the network you want to use, but since this tutorial is made for
     //          Moonbeam, the hub chain will always be Moonbeam / Moonbase Alpha
     const hubChain = CHAIN_IDS.moonbase;
-    const args = [hubChain, lzEndpointAddress, voteToken];
+    const args = [hubChain, lzEndpointAddress, voteToken, TARGET_SECONDS_PER_BLOCK[getNetworkName()]];
 
     console.log(`Deploying VoteAggregator on ${getNetworkName()} with ${deployer}...`);
 

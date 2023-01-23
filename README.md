@@ -40,7 +40,7 @@ You should also delegate votes to yourself so that you can do votes. This exampl
 but you should use whatever your account address is.  
 
 ```
-npx hardhat delegateVotes --network dev-node --acc 0x6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b
+npx hardhat delegateVotes --network -node --acc 0x6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b
 ```
 
 ### CrossChainDAO
