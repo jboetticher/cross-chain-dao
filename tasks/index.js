@@ -27,6 +27,22 @@ task("readTokenData",
     "the account to read"
 );
 
+task("readDAOData", 
+    "Reads data about the CrossChainDAO.",
+    require("./readDAOData")
+).addParam(
+    "acc",
+    "the account to read"
+);
+
+task("readProposalData", 
+    "Reads data about a proposal.",
+    require("./readDAOData")
+).addParam(
+    "proposalid",
+    "the proposalid to read"
+);
+
 task("delegateVotes",
     "Delegates token votes to an account.",
     require("./delegateVotes")

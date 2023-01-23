@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
 import "./CrossChainGovernorVotes.sol";
 import "./LayerZero/lzApp/NonblockingLzApp.sol";
-import "./IConvertBlocks.sol";
 
 /* 
 ~~~~~~~ ON OPENZEPPELIN ~~~~~~
@@ -32,8 +31,7 @@ contract CrossChainDAO is
     GovernorCountingSimple,
     CrossChainGovernorVotes,
     CrossChainGovernorVotesQuorumFraction,
-    NonblockingLzApp,
-    BlockConverter
+    NonblockingLzApp
 {
     constructor(
         IVotes _token,
@@ -60,7 +58,7 @@ contract CrossChainDAO is
     }
 
     // The lz-chain IDs that the DAO expects to receive data from during the collection phase
-    uint16[] spokeChains;
+    uint16[] public spokeChains;
 
     // Whether or not the DAO finished the collection phase. It would be more efficient to add Collection as a status
     // in the Governor interface, but that would require editing the source file. It is a bit out of scope to completely
@@ -178,16 +176,14 @@ contract CrossChainDAO is
             calldatas,
             description
         );
-        return proposalId;
 
-        // TODO: figure out the issue! Because super.propose worked but something wrong is below
+        // TODO: figure out the issue on moonbase alpha! Because super.propose worked but something wrong is below
+        //          it looks like the block conversion is what's wrong
 
         // Now send the proposal to all of the other chains
-        // You'll want to convert the current block into
+        // NOTE: You could also provide the time end, but that should be done with a timestamp as well
         for (uint16 i = 0; i < spokeChains.length; i++) {
-            uint256 bNumStart = convertBlocks(spokeChains[i], proposalSnapshot(proposalId));
-            uint256 bNumEnd = convertBlocks(spokeChains[i], proposalDeadline(proposalId));
-            bytes memory payload = abi.encode(1, abi.encode(proposalId, bNumStart, bNumEnd));
+            bytes memory payload = abi.encode(1, abi.encode(proposalId, block.timestamp));
             _lzSend({
                 _dstChainId: spokeChains[i],
                 _payload: payload,
@@ -200,6 +196,7 @@ contract CrossChainDAO is
 
         return proposalId;
     }
+    uint256 public rounds;
 
     // The following functions are overrides required by Solidity.
 

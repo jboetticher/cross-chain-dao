@@ -1,6 +1,22 @@
 # Example Cross-Chain DAO
 This is an example of a cross-chain DAO. It follows a hub-and-spoke model.  
-The `CrossChainDAO.sol` file is the main logic. The `DAOSatellite.sol` contract communicates across chains with the `CrossChainDAO.sol` smart contract.
+The `CrossChainDAO.sol` file is the main logic. The `DAOSatellite.sol` contract communicates across chains with the `CrossChainDAO.sol` smart contract.  
+
+## Design
+The original process of a DAO (OpenZeppelin contract inspired by Compound) would have the following steps:  
+1. Propose
+2. Voting Period
+3. Execution  
+
+The cross-chain DAO would have these steps:  
+1. Propose
+2. Voting Period
+3. Collection Period
+4. Execution
+
+When the proposal is initiated, it uses a past snapshot to determine which account has so many votes. During the voting period, accounts are able to cast yay or nay for a vote. During execution, once the voting period is finished, if the vote succeeds, anyone can execute the proposal.  
+
+The collection period is unique to the cross-chain DAO because it is when all of the votes from all of the chains are collected and processed on the hub chain to determine which side won.  
 
 ## Deployment
 The following docs will be for deploying to hub chain Moonbase Alpha and spoke chain Fantom.
@@ -58,7 +74,7 @@ npx hardhat deploy --tags SimpleIncrementer --network moonbase
 ```
 
 ## Begin a Proposal & Vote
-You can begin a proposal on the hub chain.  
+You can begin a proposal on the hub chain that increments a number using the SimpleIncrementer.  
 
 ```
 npx hardhat newEmptyProposal --desc "My first cross-chain proposal!"

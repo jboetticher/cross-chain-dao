@@ -18,14 +18,17 @@ contract VoteAggregator is NonblockingLzApp {
     constructor(
         uint16 _hubChain,
         address _endpoint,
-        IVotes _token
+        IVotes _token,
+        uint _targetSecondsPerBlock
     ) NonblockingLzApp(_endpoint) {
         hubChain = _hubChain;
         token = _token;
+        targetSecondsPerBlock = _targetSecondsPerBlock;
     }
 
     uint16 public immutable hubChain;
     IVotes public immutable token;
+    uint256 public immutable targetSecondsPerBlock;
     uint256 private _quorumNumerator; // DEPRECATED
     mapping(uint256 => RemoteProposal) _proposals;
 
@@ -35,9 +38,8 @@ contract VoteAggregator is NonblockingLzApp {
         // NOTE:    This is an alright solution given the assumption that there is no downtime on any chain.
         //          Will need a proper solution still to fix in case of such a scenario
         uint256 localVoteStart; // You could also use uint64 in the Timers library, like OpenZeppelin uses
-        uint256 localVoteEnd;
         bool voteFinished;
-        // bool canceled; TODO: implement cancelation
+        // bool canceled; TODO: implement cancelation on your own
     }
 
     function castVote(uint256 proposalId, uint8 support)
@@ -81,9 +83,23 @@ contract VoteAggregator is NonblockingLzApp {
         // Do 1 of 2 things:
         // 0. Begin a proposal on the local chain, with local block times
         if (option == 0) {
-            (uint256 proposalId, uint256 proposalStart, uint256 proposalEnd) = abi.decode(payload, (uint256, uint256, uint256));
-            require(_proposals[proposalId].localVoteEnd == 0, "Proposal ID must be unique.");
-            _proposals[proposalId] = RemoteProposal(proposalStart, proposalEnd, false);
+            (uint256 proposalId, uint256 proposalStart) = abi.decode(payload, (uint256, uint256));
+            require(_proposals[proposalId].localVoteStart == 0, "Proposal ID must be unique.");
+
+            // Snapshot cut-off estimation
+            // Estimates what block with the original timestamp would have been on this local chain
+            // There are security issues, since this estimation is less accurate over time, but this is more simple than an oracle.
+            // One issue includes the ability to vote multiple times on multiple chains in order of increasing cut-off, if they knew beforehand that
+            // a proposal would be made
+            uint256 cutOffBlockEstimation = 0;
+            if(proposalStart > block.timestamp) {
+                cutOffBlockEstimation = block.number - (proposalStart - block.timestamp) / targetSecondsPerBlock;
+            }
+            else {
+                cutOffBlockEstimation = block.number;
+            }
+
+            _proposals[proposalId] = RemoteProposal(proposalStart, false);
         }
         // 1. Send vote results back to the local chain
         else if (option == 1) {

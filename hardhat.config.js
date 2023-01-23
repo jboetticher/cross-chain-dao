@@ -32,6 +32,11 @@ module.exports = {
     ]
   },
   networks: {
+    moonbeam: {
+      url: 'https://moonbeam.public.blastapi.io',
+      chainId: 1284,
+      accounts: [privateKey]
+    },
     moonbase: {
       url: 'https://rpc.api.moonbase.moonbeam.network',
       chainId: 1287, // 0x507 in hex,
