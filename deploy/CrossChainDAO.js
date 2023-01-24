@@ -15,7 +15,7 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
 
     // NOTE:    change this based on the network you want to use, but since this tutorial is made for
     //          Moonbeam, the hub chain will always be Moonbeam / Moonbase Alpha
-    const spokeChains = [ CHAIN_IDS["fantom-testnet"] ]// getNetworkName() == "moonbase" ? [ CHAIN_IDS["fantom-testnet"] ] : [];
+    const spokeChains = getNetworkName() == "moonbase" ? [ CHAIN_IDS["fantom-testnet"] ] : [];
     const args = [tokenAddr, lzEndpointAddress, spokeChains];
 
     console.log(`Deploying CrossChainDAO on ${getNetworkName()} with ${deployer}...`);

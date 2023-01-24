@@ -73,12 +73,21 @@ This is an optional contract, but you can use it for testing out proposals and u
 npx hardhat deploy --tags SimpleIncrementer --network moonbase
 ```
 
-## Begin a Proposal & Vote
+## Begin a Proposal
 You can begin a proposal on the hub chain that increments a number using the SimpleIncrementer.  
 
 ```
-npx hardhat newEmptyProposal --desc "My first cross-chain proposal!"
+npx hardhat newEmptyProposal --network moonbase --desc "My first cross-chain proposal"
 ```
+
+## Vote on the Proposal
+If you've just deployed, you should see the proposeId in the console. You can cast a vote with the following command:  
+
+```
+npx hardhat vote --network dev-node --support 1 --proposalid {INSERT_PROPOSAL_ID} 
+```
+
+0 is AGAINST, 1 is FOR, 2 is ABSTAIN.
 
 ## Testing Smart Deployment on Dev Node
 Deploy the cross chain DAO token:

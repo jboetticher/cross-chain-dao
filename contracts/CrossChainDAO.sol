@@ -151,6 +151,7 @@ contract CrossChainDAO is
 
         // Sends an empty message to each of the aggregators. If they receive a message at all,
         // it is their cue to send data back
+        uint256 crossChainFee = msg.value / spokeChains.length;
         for (uint16 i = 0; i < spokeChains.length; i++) {
             bytes memory payload = abi.encode(0, abi.encode(proposalId));
             _lzSend({
@@ -159,17 +160,21 @@ contract CrossChainDAO is
                 _refundAddress: payable(address(this)),
                 _zroPaymentAddress: address(0x0),
                 _adapterParams: bytes(""),
-                _nativeFee: 0.1 ether
+                _nativeFee: crossChainFee
             });
         }
     }
 
-    function propose(
+    function propose(address[] memory, uint256[] memory, bytes[] memory, string memory) public virtual override returns (uint256) {
+        revert("Use cross-chain propose!");
+    }
+
+    function crossChainPropose(
         address[] memory targets,
         uint256[] memory values,
         bytes[] memory calldatas,
         string memory description
-    ) public virtual override returns (uint256) {
+    ) public virtual payable returns (uint256) {
         uint256 proposalId = super.propose(
             targets,
             values,
@@ -182,16 +187,19 @@ contract CrossChainDAO is
 
         // Now send the proposal to all of the other chains
         // NOTE: You could also provide the time end, but that should be done with a timestamp as well
-        for (uint16 i = 0; i < spokeChains.length; i++) {
-            bytes memory payload = abi.encode(1, abi.encode(proposalId, block.timestamp));
-            _lzSend({
-                _dstChainId: spokeChains[i],
-                _payload: payload,
-                _refundAddress: payable(address(this)),
-                _zroPaymentAddress: address(0x0),
-                _adapterParams: bytes(""),
-                _nativeFee: 0.1 ether
-            });
+        if(spokeChains.length > 0) {
+            uint256 crossChainFee = msg.value / spokeChains.length;
+            for (uint16 i = 0; i < spokeChains.length; i++) {
+                bytes memory payload = abi.encode(1, abi.encode(proposalId, block.timestamp));
+                _lzSend({
+                    _dstChainId: spokeChains[i],
+                    _payload: payload,
+                    _refundAddress: payable(address(this)),
+                    _zroPaymentAddress: address(0x0),
+                    _adapterParams: bytes(""),
+                    _nativeFee: crossChainFee
+                });
+            }
         }
 
         return proposalId;

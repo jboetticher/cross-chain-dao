@@ -21,8 +21,8 @@ module.exports = async function (taskArgs, hre) {
     const callDatas = [incrementData];
 
     // Delegate votes to task args
-    let tx = await (await dao.propose(targets, values, callDatas, taskArgs.desc)).wait()
-    console.log(`✅ [${hre.network.name}] CrossChainDAO.propose([${incrementer.address}], [0], [${incrementData}], ${taskArgs.desc})`)
+    let tx = await (await dao.crossChainPropose(targets, values, callDatas, taskArgs.desc, { value: "10000000000000000" })).wait()
+    console.log(`✅ [${hre.network.name}] CrossChainDAO.crossChainPropose([${incrementer.address}], [0], [${incrementData}], ${taskArgs.desc})`)
     console.log(`...tx: ${tx.transactionHash}`);
 
     // Print out the proposal ID
@@ -31,6 +31,6 @@ module.exports = async function (taskArgs, hre) {
         ["uint256", "address", "address[]", "uint256[]", "string[]", "bytes[]", "uint256", "uint256", "string"], 
         proposalCreatedEventData
     );
-    console.log(`[${hre.network.name}] CrossChainDAO.propose => proposeId: ${proposalCreatedEventDecoded[0].toString()}`)
+    console.log(`[${hre.network.name}] CrossChainDAO.crossChainPropose => proposeId: ${proposalCreatedEventDecoded[0].toString()}`)
     //console.log(proposalCreatedEventDecoded);
 }
