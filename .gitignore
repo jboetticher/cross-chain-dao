@@ -7,6 +7,7 @@ typechain-types
 .DS_Store
 secrets.json
 deployments
+Deployments.md
 
 #Hardhat files
 cache

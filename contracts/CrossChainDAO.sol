@@ -21,8 +21,6 @@ and can be seen in giant governance schemes like Polkadot. However, this will no
 simplicity's sake.
 */
 
-// I think the current gameplan is to make our own IVotes smart contract
-
 // TODO: figure out why the contracts compiled into something so massive
 
 contract CrossChainDAO is
@@ -182,15 +180,15 @@ contract CrossChainDAO is
             description
         );
 
-        // TODO: figure out the issue on moonbase alpha! Because super.propose worked but something wrong is below
-        //          it looks like the block conversion is what's wrong
-
         // Now send the proposal to all of the other chains
         // NOTE: You could also provide the time end, but that should be done with a timestamp as well
         if(spokeChains.length > 0) {
             uint256 crossChainFee = msg.value / spokeChains.length;
             for (uint16 i = 0; i < spokeChains.length; i++) {
                 bytes memory payload = abi.encode(1, abi.encode(proposalId, block.timestamp));
+                
+                // NOTE: there is an error with the lzSend here I think... GAH
+
                 _lzSend({
                     _dstChainId: spokeChains[i],
                     _payload: payload,

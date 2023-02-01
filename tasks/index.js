@@ -1,6 +1,6 @@
 task("daoSetTrustedRemote",
     "Set up the trusted remote addresses for a DAO.",
-    require("./tokenSetTrustedRemote")
+    require("./daoSetTrustedRemote")
 ).addParam(
     "targetNetwork",
     "the targetNetwork to set as trusted"
@@ -37,7 +37,7 @@ task("readDAOData",
 
 task("readProposalData", 
     "Reads data about a proposal.",
-    require("./readDAOData")
+    require("./readProposalData")
 ).addParam(
     "proposalid",
     "the proposalid to read"

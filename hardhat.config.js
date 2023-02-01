@@ -38,9 +38,10 @@ module.exports = {
       accounts: [privateKey]
     },
     moonbase: {
-      url: 'https://rpc.api.moonbase.moonbeam.network',
+      url: 'https://moonbase-alpha.blastapi.io/adafb88b-6012-4705-8aed-eeabbeed35da',
       chainId: 1287, // 0x507 in hex,
-      accounts: [privateKey]
+      accounts: [privateKey],
+      gasPrice: 200000000
     },
     fuji: {
       url: 'https://api.avax-test.network/ext/bc/C/rpc',

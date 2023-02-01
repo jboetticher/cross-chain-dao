@@ -6,10 +6,10 @@ module.exports = async function (taskArgs, hre) {
     const dstAddr = getDeploymentAddresses(taskArgs.targetNetwork)["VoteAggregator"]
 
     // get local contract instance
-    const token = await ethers.getContract("CrossChainDAO")
-    console.log(`[source] CrossChainDAO.address: ${token.address}`)
+    const dao = await ethers.getContract("CrossChainDAO");
+    console.log(`[source] CrossChainDAO.address: ${dao.address}`)
 
-    let tx = await (await token.setTrustedRemote(dstChainId, dstAddr)).wait()
-    console.log(`✅ [${hre.network.name}] CrossChainDAO.setTrustedRemote( ${dstChainId}, ${dstAddr} )`)
+    let tx = await (await dao.setTrustedRemoteAddress(dstChainId, dstAddr)).wait()
+    console.log(`✅ [${hre.network.name}] CrossChainDAO.setTrustedRemoteAddress( ${dstChainId}, ${dstAddr} )`)
     console.log(`...tx: ${tx.transactionHash}`)
 }
