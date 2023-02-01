@@ -13,3 +13,10 @@ module.exports = async function (taskArgs, hre) {
     console.log(`✅ [${hre.network.name}] CrossChainDAO.setTrustedRemoteAddress( ${dstChainId}, ${dstAddr} )`)
     console.log(`...tx: ${tx.transactionHash}`)
 }
+
+
+
+// HEY YOU YEAH YOU IN THE FUTURE
+
+// CHECK THE FANTOM VOTEAGGREGATOR TO SEE IF 
+// PROPOSAL WAS RECEIVED PROPERLY

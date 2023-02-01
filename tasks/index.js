@@ -43,6 +43,14 @@ task("readProposalData",
     "the proposalid to read"
 );
 
+task("readVoteAggData", 
+    "Reads data about a proposal on the vote aggregator.",
+    require("./readVoteAggData")
+).addParam(
+    "proposalid",
+    "the proposalid to read"
+);
+
 task("delegateVotes",
     "Delegates token votes to an account.",
     require("./delegateVotes")

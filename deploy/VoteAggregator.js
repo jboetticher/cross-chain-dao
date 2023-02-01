@@ -1,6 +1,6 @@
 const LZ_ENDPOINTS = require("../constants/layerzeroEndpoints.json");
 const CHAIN_IDS = require("../constants/chainIds.json");
-const TARGET_SECONDS_PER_BLOCK = require("../constants/chainIds.json");
+const TARGET_SECONDS_PER_BLOCK = require("../constants/targetSecondsPerBlock.json");
 const { getDeploymentAddresses } = require("../utils/readStatic");
 
 module.exports = async function ({ deployments, getNamedAccounts }) {

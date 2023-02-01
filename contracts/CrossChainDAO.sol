@@ -49,6 +49,8 @@ contract CrossChainDAO is
         spokeChains = _spokeChains;
     }
 
+    event LzAppToSendThisPayload(bytes);
+
     struct ExternalVotingData {
         uint256 quorum;
         uint256 voteWeight;
@@ -185,10 +187,9 @@ contract CrossChainDAO is
         if(spokeChains.length > 0) {
             uint256 crossChainFee = msg.value / spokeChains.length;
             for (uint16 i = 0; i < spokeChains.length; i++) {
-                bytes memory payload = abi.encode(1, abi.encode(proposalId, block.timestamp));
-                
-                // NOTE: there is an error with the lzSend here I think... GAH
+                bytes memory payload = abi.encode(0, abi.encode(proposalId, block.timestamp));
 
+                emit LzAppToSendThisPayload(payload);                    
                 _lzSend({
                     _dstChainId: spokeChains[i],
                     _payload: payload,

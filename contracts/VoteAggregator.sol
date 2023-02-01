@@ -30,7 +30,7 @@ contract VoteAggregator is NonblockingLzApp {
     IVotes public immutable token;
     uint256 public immutable targetSecondsPerBlock;
     uint256 private _quorumNumerator; // DEPRECATED
-    mapping(uint256 => RemoteProposal) _proposals;
+    mapping(uint256 => RemoteProposal) public proposals;
 
     struct RemoteProposal {
         // Blocks provided by the hub chain as to when the local votes should start/finish.
@@ -50,10 +50,14 @@ contract VoteAggregator is NonblockingLzApp {
         // Get the vote weights from the local CrossChainToken implementation
         // Check them against the local block boundaries. If the boundaries are closed, then revert
         // Doesn't need to send a vote
-        RemoteProposal storage proposal = _proposals[proposalId];
+        RemoteProposal storage proposal = proposals[proposalId];
         require(
             !proposal.voteFinished,
-            "Governor: vote not currently active"
+            "VoteAggregator: vote not currently active"
+        );
+        require(
+            isProposal(proposalId), 
+            "VoteAggregator: not a started vote"
         );
 
         uint256 weight = _getVotes(
@@ -67,6 +71,10 @@ contract VoteAggregator is NonblockingLzApp {
         return weight;
     }
 
+    function isProposal(uint256 proposalId) view public returns(bool) {
+        return proposals[proposalId].localVoteStart != 0;
+    }
+
     function _nonblockingLzReceive(
         uint16 _srcChainId,
         bytes memory /* _srcAddress */,
@@ -75,31 +83,42 @@ contract VoteAggregator is NonblockingLzApp {
     ) internal override {
         require(_srcChainId == hubChain, "Only messages from the hub chain can be received!");
 
-        (uint256 option, bytes memory payload) = abi.decode(
-            _payload,
-            (uint16, bytes)
-        );
+        // (uint256 option, bytes memory payload) = abi.decode(
+        //     _payload,
+        //     (uint256, bytes)
+        // );
+
+        // THIS IS TEMPORARY
+        proposals[0] = RemoteProposal(101, false);
+        uint256 option = 0;
+        bytes memory payload = _payload;
 
         // Do 1 of 2 things:
         // 0. Begin a proposal on the local chain, with local block times
         if (option == 0) {
-            (uint256 proposalId, uint256 proposalStart) = abi.decode(payload, (uint256, uint256));
-            require(_proposals[proposalId].localVoteStart == 0, "Proposal ID must be unique.");
+            // (uint256 proposalId, uint256 proposalStart) = abi.decode(payload, (uint256, uint256));
+            // require(!isProposal(proposalId), "Proposal ID must be unique.");
 
-            // Snapshot cut-off estimation
-            // Estimates what block with the original timestamp would have been on this local chain
-            // There are security issues, since this estimation is less accurate over time, but this is more simple than an oracle.
-            // One issue includes the ability to vote multiple times on multiple chains in order of increasing cut-off, if they knew beforehand that
-            // a proposal would be made
-            uint256 cutOffBlockEstimation = 0;
-            if(proposalStart > block.timestamp) {
-                cutOffBlockEstimation = block.number - (proposalStart - block.timestamp) / targetSecondsPerBlock;
-            }
-            else {
-                cutOffBlockEstimation = block.number;
-            }
+            // // Snapshot cut-off estimation
+            // // Estimates what block with the original timestamp would have been on this local chain
+            // // There are security issues, since this estimation is less accurate over time, but this is more simple than an oracle.
+            // // One issue includes the ability to vote multiple times on multiple chains in order of increasing cut-off, if they knew beforehand that
+            // // a proposal would be made
+            // uint256 cutOffBlockEstimation = 0;
+            // if(proposalStart < block.timestamp) {
+            //     uint256 blockAdjustment = (block.timestamp - proposalStart) / targetSecondsPerBlock;
+            //     if(blockAdjustment < block.number) {
+            //         cutOffBlockEstimation = block.number - blockAdjustment;
+            //     }
+            //     else {
+            //         cutOffBlockEstimation = block.number;
+            //     }
+            // }
+            // else {
+            //     cutOffBlockEstimation = block.number;
+            // }
 
-            _proposals[proposalId] = RemoteProposal(proposalStart, false);
+            // proposals[proposalId] = RemoteProposal(cutOffBlockEstimation, false);
         }
         // 1. Send vote results back to the local chain
         else if (option == 1) {
@@ -267,3 +286,32 @@ contract VoteAggregator is NonblockingLzApp {
         }
     }
 }
+
+
+/*
+0000000000000000000000000000000000000000000000000000000000000020
+00000000000000000000000000000000000000000000000000000000000000a0
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000040
+0000000000000000000000000000000000000000000000000000000000000040
+4a23f3e29309a9c63865d5852a14171a9b40a37537aa3d76f72a51ca74ad150a
+0000000000000000000000000000000000000000000000000000000063daeb6c
+
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000040
+0000000000000000000000000000000000000000000000000000000000000040
+4a23f3e29309a9c63865d5852a14171a9b40a37537aa3d76f72a51ca74ad150a
+0000000000000000000000000000000000000000000000000000000063daf0e0
+
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000404a23f3e29309a9c63865d5852a14171a9b40a37537aa3d76f72a51ca74ad150a0000000000000000000000000000000000000000000000000000000063daeb6c
+
+
+
+uint256: 0
+1:
+uint256: 33534673675224055151516715811226726201658247519517012145911401487859970807050
+2:
+uint256: 1675292896
+3:
+bytes: 
+*/
