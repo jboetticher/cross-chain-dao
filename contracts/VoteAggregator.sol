@@ -33,6 +33,7 @@ contract VoteAggregator is NonblockingLzApp {
     uint256 public immutable targetSecondsPerBlock;
     uint256 private _quorumNumerator; // DEPRECATED
     mapping(uint256 => RemoteProposal) public proposals;
+    mapping(uint256 => ProposalVote) public proposalVotes;
 
     struct RemoteProposal {
         // Blocks provided by the hub chain as to when the local votes should start/finish.
@@ -244,7 +245,6 @@ contract VoteAggregator is NonblockingLzApp {
         emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);
     }
 
-    mapping(uint256 => ProposalVote) _proposalVotes;
 
     struct ProposalVote {
         uint256 againstVotes;
@@ -268,7 +268,7 @@ contract VoteAggregator is NonblockingLzApp {
         uint8 support,
         uint256 weight
     ) internal virtual {
-        ProposalVote storage proposalVote = _proposalVotes[proposalId];
+        ProposalVote storage proposalVote = proposalVotes[proposalId];
 
         require(!proposalVote.hasVoted[account], "GovernorVotingSimple: vote already cast");
         proposalVote.hasVoted[account] = true;
@@ -283,33 +283,13 @@ contract VoteAggregator is NonblockingLzApp {
             revert("GovernorVotingSimple: invalid value for enum VoteType");
         }
     }
+
+    /**
+     * Returns true if the user has voted for the proposal, false if not.
+     * @param proposalId the proposal ID of the proposal to check
+     * @param account the account to check for voting
+     */
+    function hasVoted(uint256 proposalId, address account) external view returns(bool) {
+        return proposalVotes[proposalId].hasVoted[account];
+    }
 }
-
-
-/*
-0000000000000000000000000000000000000000000000000000000000000020
-00000000000000000000000000000000000000000000000000000000000000a0
-0000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000040
-0000000000000000000000000000000000000000000000000000000000000040
-4a23f3e29309a9c63865d5852a14171a9b40a37537aa3d76f72a51ca74ad150a
-0000000000000000000000000000000000000000000000000000000063daeb6c
-
-0000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000040
-0000000000000000000000000000000000000000000000000000000000000040
-4a23f3e29309a9c63865d5852a14171a9b40a37537aa3d76f72a51ca74ad150a
-0000000000000000000000000000000000000000000000000000000063daf0e0
-
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000404a23f3e29309a9c63865d5852a14171a9b40a37537aa3d76f72a51ca74ad150a0000000000000000000000000000000000000000000000000000000063daeb6c
-
-
-
-uint256: 0
-1:
-uint256: 33534673675224055151516715811226726201658247519517012145911401487859970807050
-2:
-uint256: 1675292896
-3:
-bytes: 
-*/

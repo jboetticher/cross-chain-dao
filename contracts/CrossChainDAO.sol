@@ -39,7 +39,7 @@ contract CrossChainDAO is
         Governor("Moonbeam Example Cross Chain DAO")
         GovernorSettings(
             1,  /* 1 block voting delay */
-            50, /* 5 block voting period */
+            30, /* 30 block voting period */
             0   /* 0 block proposal threshold */
         )
         CrossChainGovernorVotes(_token)
@@ -118,10 +118,13 @@ contract CrossChainDAO is
         bytes[] memory calldatas,
         bytes32 descriptionHash
     ) internal override {
+        finishCollectionPhase(proposalId);
+
         require(
             collectionFinished[proposalId],
             "Collection phase for this proposal is unfinished!"
         );
+        
         super._beforeExecute(
             proposalId,
             targets,
@@ -132,22 +135,23 @@ contract CrossChainDAO is
     }
 
     // Marks a collection phase as true if all of the
-    function finishCollectionPhase(uint256 proposalId) external {
+    function finishCollectionPhase(uint256 proposalId) public {
         bool phaseFinished = true;
         for (uint16 i = 0; i < spokeChains.length && phaseFinished; i++) {
-            phaseFinished = voting[proposalId][spokeChains[i]].initialized;
+            phaseFinished = phaseFinished && voting[proposalId][spokeChains[i]].initialized;
         }
-        if (phaseFinished) {
-            collectionFinished[proposalId] = true;
-        }
+
+        collectionFinished[proposalId] = phaseFinished;
     }
 
     // Requests the voting data from all of the spoke chains
     function requestCollections(uint256 proposalId) public payable {
         require(
-            collectionStarted[proposalId],
+            !collectionStarted[proposalId],
             "Collection phase for this proposal has already finished!"
         );
+
+        collectionStarted[proposalId] = true;
 
         // Sends an empty message to each of the aggregators. If they receive a message at all,
         // it is their cue to send data back

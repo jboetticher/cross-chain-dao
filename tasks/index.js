@@ -77,3 +77,22 @@ task("vote",
     "support",
     "0 for con, 1 for pro"
 )
+
+task("hasVoted",
+    "Whether or not an account has voted on a proposal.",
+    require("./hasVoted")
+).addParam(
+    "proposalid",
+    "the id of the empty proposal"
+).addParam(
+    "acc",
+    "the account to query"
+)
+
+task("requestCollection",
+    "A request to collect votes from satellite chains.",
+    require("./requestCollection")
+).addParam(
+    "proposalid",
+    "the id of the empty proposal"
+)
