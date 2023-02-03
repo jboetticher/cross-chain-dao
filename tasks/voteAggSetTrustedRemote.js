@@ -14,7 +14,7 @@ module.exports = async function (taskArgs, hre) {
     const token = await ethers.getContract("VoteAggregator")
     console.log(`[source] VoteAggregator.address: ${token.address}`)
 
-    let tx = await (await token.setTrustedRemote(dstChainId, crossChainDAOAddr)).wait()
-    console.log(`✅ [${hre.network.name}] VoteAggregator.setTrustedRemote( ${dstChainId}, ${crossChainDAOAddr} )`)
+    let tx = await (await token.setTrustedRemoteAddress(dstChainId, crossChainDAOAddr)).wait()
+    console.log(`✅ [${hre.network.name}] VoteAggregator.setTrustedRemoteAddress( ${dstChainId}, ${crossChainDAOAddr} )`)
     console.log(`...tx: ${tx.transactionHash}`)
 }

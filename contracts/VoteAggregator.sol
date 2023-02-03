@@ -13,6 +13,8 @@ import "@openzeppelin/contracts/governance/utils/IVotes.sol";
 contract VoteAggregator is NonblockingLzApp {
     using Checkpoints for Checkpoints.History;
 
+    event RemoteProposalReceived(uint256 id, uint256 localVoteStart);
+
     error VotingHasClosedOnThisChain();
 
     constructor(
@@ -83,42 +85,38 @@ contract VoteAggregator is NonblockingLzApp {
     ) internal override {
         require(_srcChainId == hubChain, "Only messages from the hub chain can be received!");
 
-        // (uint256 option, bytes memory payload) = abi.decode(
-        //     _payload,
-        //     (uint256, bytes)
-        // );
-
-        // THIS IS TEMPORARY
-        proposals[0] = RemoteProposal(101, false);
-        uint256 option = 0;
-        bytes memory payload = _payload;
+        (uint256 option, bytes memory payload) = abi.decode(
+            _payload,
+            (uint256, bytes)
+        );
 
         // Do 1 of 2 things:
         // 0. Begin a proposal on the local chain, with local block times
         if (option == 0) {
-            // (uint256 proposalId, uint256 proposalStart) = abi.decode(payload, (uint256, uint256));
-            // require(!isProposal(proposalId), "Proposal ID must be unique.");
+            (uint256 proposalId, uint256 proposalStart) = abi.decode(payload, (uint256, uint256));
+            require(!isProposal(proposalId), "Proposal ID must be unique.");
 
-            // // Snapshot cut-off estimation
-            // // Estimates what block with the original timestamp would have been on this local chain
-            // // There are security issues, since this estimation is less accurate over time, but this is more simple than an oracle.
-            // // One issue includes the ability to vote multiple times on multiple chains in order of increasing cut-off, if they knew beforehand that
-            // // a proposal would be made
-            // uint256 cutOffBlockEstimation = 0;
-            // if(proposalStart < block.timestamp) {
-            //     uint256 blockAdjustment = (block.timestamp - proposalStart) / targetSecondsPerBlock;
-            //     if(blockAdjustment < block.number) {
-            //         cutOffBlockEstimation = block.number - blockAdjustment;
-            //     }
-            //     else {
-            //         cutOffBlockEstimation = block.number;
-            //     }
-            // }
-            // else {
-            //     cutOffBlockEstimation = block.number;
-            // }
+            // Snapshot cut-off estimation
+            // Estimates what block with the original timestamp would have been on this local chain
+            // There are security issues, since this estimation is less accurate over time, but this is more simple than an oracle.
+            // One issue includes the ability to vote multiple times on multiple chains in order of increasing cut-off, if they knew beforehand that
+            // a proposal would be made
+            uint256 cutOffBlockEstimation = 0;
+            if(proposalStart < block.timestamp) {
+                uint256 blockAdjustment = (block.timestamp - proposalStart) / targetSecondsPerBlock;
+                if(blockAdjustment < block.number) {
+                    cutOffBlockEstimation = block.number - blockAdjustment;
+                }
+                else {
+                    cutOffBlockEstimation = block.number;
+                }
+            }
+            else {
+                cutOffBlockEstimation = block.number;
+            }
 
-            // proposals[proposalId] = RemoteProposal(cutOffBlockEstimation, false);
+            proposals[proposalId] = RemoteProposal(cutOffBlockEstimation, false);
+            emit RemoteProposalReceived(proposalId, cutOffBlockEstimation);
         }
         // 1. Send vote results back to the local chain
         else if (option == 1) {

@@ -14,4 +14,14 @@ module.exports = async function (taskArgs, hre) {
     let proposalData = await aggregator.proposals(proposalId);
     console.log(`✅ [${hre.network.name}] VoteAggregator.proposals( ${proposalId} ):`);
     console.log(proposalData);
+
+    try {
+        const chainToQuery = CHAIN_ID.moonbase;
+        let addr = await aggregator.getTrustedRemoteAddress(chainToQuery);
+        console.log(`[source] VoteAggregator.getTrustedRemoteAddress(${chainToQuery}):`, addr);
+    }
+    catch(e) {
+        console.log(`[source] VoteAggregator.getTrustedRemoteAddress ERROR!`);
+        console.log(`[source]`, e);
+    }
 }
