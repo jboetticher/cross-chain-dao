@@ -4,10 +4,12 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/governance/Governor.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
-import "./CrossChainGovernorVotes.sol";
 import "./LayerZero/lzApp/NonblockingLzApp.sol";
+import "./CrossChain/CrossChainGovernorVotes.sol";
+import "./CrossChain/CrossChainGovernorCountingSimple.sol";
 
 /* 
+
 ~~~~~~~ ON OPENZEPPELIN ~~~~~~
 Code is generated from: https://www.openzeppelin.com/contracts
 OpenZeppelin is a widely used smart contract framework that has significatly shaped standards in solidity smart contracts.
@@ -19,6 +21,13 @@ Notice that it doesn't have a Timelock. A timelock is used to delay the executio
 in case actors who disagree with the proposal want to exit the ecosystem before it is implemented. This is a common practice
 and can be seen in giant governance schemes like Polkadot. However, this will not be included for this example for 
 simplicity's sake.
+
+~~~~~~~~~~ ON QUORUM ~~~~~~~~~
+Typically, an OpenZeppelin Governor's quorum can be altered by democracy, but for simplicity's sake, the quorum has been 
+reduced to a static value of 1 ether. This means that a single voter holding a single token can vote for a proposal and 
+allow it to pass, even if there are 100k tokens in supply. Please view OpenZeppelin's GovernorVotesQuorumFraction smart 
+contract if interested.
+
 */
 
 // TODO: figure out why the contracts compiled into something so massive
@@ -26,9 +35,8 @@ simplicity's sake.
 contract CrossChainDAO is
     Governor,
     GovernorSettings,
-    GovernorCountingSimple,
+    CrossChainGovernorCountingSimple,
     CrossChainGovernorVotes,
-    CrossChainGovernorVotesQuorumFraction,
     NonblockingLzApp
 {
     constructor(
@@ -38,36 +46,17 @@ contract CrossChainDAO is
     )
         Governor("Moonbeam Example Cross Chain DAO")
         GovernorSettings(
-            1,  /* 1 block voting delay */
+            1, /* 1 block voting delay */
             30, /* 30 block voting period */
-            0   /* 0 block proposal threshold */
+            0 /* 0 block proposal threshold */
         )
         CrossChainGovernorVotes(_token)
-        CrossChainGovernorVotesQuorumFraction(4)
         NonblockingLzApp(lzEndpoint)
     {
         spokeChains = _spokeChains;
     }
 
     event LzAppToSendThisPayload(bytes);
-
-    struct ExternalVotingData {
-        uint256 quorum;
-        uint256 voteWeight;
-        bool initialized;
-    }
-
-    // The lz-chain IDs that the DAO expects to receive data from during the collection phase
-    uint16[] public spokeChains;
-
-    // Whether or not the DAO finished the collection phase. It would be more efficient to add Collection as a status
-    // in the Governor interface, but that would require editing the source file. It is a bit out of scope to completely
-    // refactor the OpenZeppelin governance contract for cross-chain action!
-    mapping(uint256 => bool) collectionFinished;
-    mapping(uint256 => bool) collectionStarted;
-
-    // Maps to a list of external voting
-    mapping(uint256 => mapping(uint16 => ExternalVotingData)) voting;
 
     // How many blocks to wait until the collection phase is marked as finished, regardless of data received.
     uint16 collectionPhaseWaitingPeriod;
@@ -97,14 +86,19 @@ contract CrossChainDAO is
         uint16 _srcChainId,
         bytes memory payload
     ) internal virtual {
-        (uint256 _proposalId, uint256 _quorum, uint256 _voteWeight) = abi
-            .decode(payload, (uint256, uint256, uint256));
-        if (voting[_proposalId][_srcChainId].initialized) {
+        (
+            uint256 _proposalId,
+            uint256 _pro,
+            uint256 _against,
+            uint256 _abstain
+        ) = abi.decode(payload, (uint256, uint256, uint256, uint256));
+        if (spokeVotes[_proposalId][_srcChainId].initialized) {
             revert("Already initialized!");
         } else {
-            voting[_proposalId][_srcChainId] = ExternalVotingData(
-                _quorum,
-                _voteWeight,
+            spokeVotes[_proposalId][_srcChainId] = SpokeProposalVote(
+                _pro,
+                _against,
+                _abstain,
                 true
             );
         }
@@ -124,7 +118,7 @@ contract CrossChainDAO is
             collectionFinished[proposalId],
             "Collection phase for this proposal is unfinished!"
         );
-        
+
         super._beforeExecute(
             proposalId,
             targets,
@@ -132,16 +126,6 @@ contract CrossChainDAO is
             calldatas,
             descriptionHash
         );
-    }
-
-    // Marks a collection phase as true if all of the
-    function finishCollectionPhase(uint256 proposalId) public {
-        bool phaseFinished = true;
-        for (uint16 i = 0; i < spokeChains.length && phaseFinished; i++) {
-            phaseFinished = phaseFinished && voting[proposalId][spokeChains[i]].initialized;
-        }
-
-        collectionFinished[proposalId] = phaseFinished;
     }
 
     // Requests the voting data from all of the spoke chains
@@ -157,7 +141,7 @@ contract CrossChainDAO is
         // it is their cue to send data back
         uint256 crossChainFee = msg.value / spokeChains.length;
         for (uint16 i = 0; i < spokeChains.length; i++) {
-            bytes memory payload = abi.encode(0, abi.encode(proposalId));
+            bytes memory payload = abi.encode(1, abi.encode(proposalId));
             _lzSend({
                 _dstChainId: spokeChains[i],
                 _payload: payload,
@@ -169,16 +153,25 @@ contract CrossChainDAO is
         }
     }
 
-    function propose(address[] memory, uint256[] memory, bytes[] memory, string memory) public virtual override returns (uint256) {
-        revert("Use cross-chain propose!");
+    // Marks a collection phase as true if all of the satellite chains have sent a cross-chain message back
+    function finishCollectionPhase(uint256 proposalId) public {
+        bool phaseFinished = true;
+        for (uint16 i = 0; i < spokeChains.length && phaseFinished; i++) {
+            phaseFinished =
+                phaseFinished &&
+                spokeVotes[proposalId][spokeChains[i]].initialized;
+        }
+
+        collectionFinished[proposalId] = phaseFinished;
     }
 
+    // Proper proposal function
     function crossChainPropose(
         address[] memory targets,
         uint256[] memory values,
         bytes[] memory calldatas,
         string memory description
-    ) public virtual payable returns (uint256) {
+    ) public payable virtual returns (uint256) {
         uint256 proposalId = super.propose(
             targets,
             values,
@@ -188,12 +181,15 @@ contract CrossChainDAO is
 
         // Now send the proposal to all of the other chains
         // NOTE: You could also provide the time end, but that should be done with a timestamp as well
-        if(spokeChains.length > 0) {
+        if (spokeChains.length > 0) {
             uint256 crossChainFee = msg.value / spokeChains.length;
             for (uint16 i = 0; i < spokeChains.length; i++) {
-                bytes memory payload = abi.encode(0, abi.encode(proposalId, block.timestamp));
+                bytes memory payload = abi.encode(
+                    0,
+                    abi.encode(proposalId, block.timestamp)
+                );
 
-                emit LzAppToSendThisPayload(payload);                    
+                emit LzAppToSendThisPayload(payload);
                 _lzSend({
                     _dstChainId: spokeChains[i],
                     _payload: payload,
@@ -207,9 +203,20 @@ contract CrossChainDAO is
 
         return proposalId;
     }
-    uint256 public rounds;
 
-    // The following functions are overrides required by Solidity.
+    // Revert the typical propose because it doesn't allow for "payable"
+    function propose(
+        address[] memory,
+        uint256[] memory,
+        bytes[] memory,
+        string memory
+    ) public virtual override returns (uint256) {
+        revert("Use cross-chain propose!");
+    }
+
+    // =========================================================================================================
+    //                        The following functions are overrides required by Solidity
+    // =========================================================================================================
 
     /**
      * @dev Delay, in number of block, between the proposal is created and the vote starts. This can be increassed to
@@ -224,12 +231,7 @@ contract CrossChainDAO is
         return super.votingDelay();
     }
 
-    /**
-     * @dev Delay, in number of blocks, between the vote start and vote ends.
-     *
-     * NOTE: The {votingDelay} can delay the start of the vote. This must be considered when setting the voting
-     * duration compared to the voting delay.
-     */
+    // Delay, in number of blocks, between the vote start and vote ends
     function votingPeriod()
         public
         view
@@ -242,7 +244,7 @@ contract CrossChainDAO is
     function quorum(uint256 blockNumber)
         public
         view
-        override(IGovernor, CrossChainGovernorVotesQuorumFraction)
+        override(CrossChainGovernorCountingSimple, IGovernor)
         returns (uint256)
     {
         return super.quorum(blockNumber);

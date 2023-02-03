@@ -14,6 +14,7 @@ contract VoteAggregator is NonblockingLzApp {
     using Checkpoints for Checkpoints.History;
 
     event RemoteProposalReceived(uint256 id, uint256 localVoteStart);
+    event SendingQuorumDataToHub(uint256 id, uint256 forVotes, uint256 againstVotes, uint256 abstainVotes);
 
     error VotingHasClosedOnThisChain();
 
@@ -122,8 +123,11 @@ contract VoteAggregator is NonblockingLzApp {
         // 1. Send vote results back to the local chain
         else if (option == 1) {
             uint256 proposalId = abi.decode(payload, (uint256));
-            bytes memory votesAndQuorum = abi.encode(proposalId, 0, 0); /* TODO: insert votes and quorum data */
-            bytes memory votingPayload = abi.encode(0, votesAndQuorum);
+            ProposalVote storage votes = proposalVotes[proposalId];
+            bytes memory votingPayload = abi.encode(
+                0, 
+                abi.encode(proposalId, votes.forVotes, votes.againstVotes, votes.abstainVotes)
+            );
             _lzSend({
                 _dstChainId: hubChain,
                 _payload: votingPayload,
@@ -132,17 +136,12 @@ contract VoteAggregator is NonblockingLzApp {
                 _adapterParams: bytes(""),
                 _nativeFee: 0.1 ether
             });
+            emit SendingQuorumDataToHub(proposalId, votes.forVotes, votes.againstVotes, votes.abstainVotes);
         }
         // TODO: 2. Implement voting cancelation (out of scope for tutorial)
     }
 
     // The following code is copied from the Governor modules to replicate some of its logic
-
-    Checkpoints.History private _quorumNumeratorHistory;
-    event QuorumNumeratorUpdated(
-        uint256 oldQuorumNumerator,
-        uint256 newQuorumNumerator
-    );
 
     /**
      * Read the voting weight from the token's built in snapshot mechanism (see {Governor-_getVotes}).
@@ -153,98 +152,6 @@ contract VoteAggregator is NonblockingLzApp {
     ) internal view virtual returns (uint256) {
         return token.getPastVotes(account, blockNumber);
     }
-
-    /**
-     * @dev Returns the current quorum numerator. See {quorumDenominator}.
-     */
-    function quorumNumerator() public view virtual returns (uint256) {
-        return
-            _quorumNumeratorHistory._checkpoints.length == 0
-                ? _quorumNumerator
-                : _quorumNumeratorHistory.latest();
-    }
-
-    /**
-     * @dev Returns the quorum numerator at a specific block number. See {quorumDenominator}.
-     */
-    function quorumNumerator(uint256 blockNumber)
-        public
-        view
-        virtual
-        returns (uint256)
-    {
-        // If history is empty, fallback to old storage
-        uint256 length = _quorumNumeratorHistory._checkpoints.length;
-        if (length == 0) {
-            return _quorumNumerator;
-        }
-
-        // Optimistic search, check the latest checkpoint
-        Checkpoints.Checkpoint memory latest = _quorumNumeratorHistory
-            ._checkpoints[length - 1];
-        if (latest._blockNumber <= blockNumber) {
-            return latest._value;
-        }
-
-        // Otherwise, do the binary search
-        return _quorumNumeratorHistory.getAtBlock(blockNumber);
-    }
-
-    /**
-     * @dev Returns the quorum denominator. Defaults to 100, but may be overridden.
-     */
-    function quorumDenominator() public view virtual returns (uint256) {
-        return 100;
-    }
-
-    /**
-     * @dev Returns the quorum for a block number, in terms of number of votes: `supply * numerator / denominator`.
-     */
-    function quorum(uint256 blockNumber) public view virtual returns (uint256) {
-        return
-            (token.getPastTotalSupply(blockNumber) *
-                quorumNumerator(blockNumber)) / quorumDenominator();
-    }
-
-    /**
-     * @dev Changes the quorum numerator.
-     *
-     * Emits a {QuorumNumeratorUpdated} event.
-     *
-     * Requirements:
-     *
-     * - New numerator must be smaller or equal to the denominator.
-     */
-    function _updateQuorumNumerator(uint256 newQuorumNumerator)
-        internal
-        virtual
-    {
-        require(
-            newQuorumNumerator <= quorumDenominator(),
-            "GovernorVotesQuorumFraction: quorumNumerator over quorumDenominator"
-        );
-
-        uint256 oldQuorumNumerator = quorumNumerator();
-
-        // Make sure we keep track of the original numerator in contracts upgraded from a version without checkpoints.
-        if (
-            oldQuorumNumerator != 0 &&
-            _quorumNumeratorHistory._checkpoints.length == 0
-        ) {
-            _quorumNumeratorHistory._checkpoints.push(
-                Checkpoints.Checkpoint({
-                    _blockNumber: 0,
-                    _value: SafeCast.toUint224(oldQuorumNumerator)
-                })
-            );
-        }
-
-        // Set new quorum for future proposals
-        _quorumNumeratorHistory.push(newQuorumNumerator);
-
-        emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);
-    }
-
 
     struct ProposalVote {
         uint256 againstVotes;
@@ -293,3 +200,10 @@ contract VoteAggregator is NonblockingLzApp {
         return proposalVotes[proposalId].hasVoted[account];
     }
 }
+
+/*
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000040
+0000000000000000000000000000000000000000000000000000000000000020
+1D9793B0FBE0D996C457A870769C06B04C68EFF27177274219AE6773E81A8CE6
+*/
