@@ -22,7 +22,8 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
             from: deployer,
             args,
             log: true,
-            waitConfirmations: 1
+            waitConfirmations: 1,
+            value: "500000000000000000"
         });
 
         // Wait for transactions

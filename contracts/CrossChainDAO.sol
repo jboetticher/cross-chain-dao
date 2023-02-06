@@ -131,6 +131,10 @@ contract CrossChainDAO is
     // Requests the voting data from all of the spoke chains
     function requestCollections(uint256 proposalId) public payable {
         require(
+            block.number > proposalDeadline(proposalId),
+            "Cannot request for vote collection until after the vote period is over!"
+        );
+        require(
             !collectionStarted[proposalId],
             "Collection phase for this proposal has already finished!"
         );

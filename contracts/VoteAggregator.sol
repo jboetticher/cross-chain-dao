@@ -23,7 +23,7 @@ contract VoteAggregator is NonblockingLzApp {
         address _endpoint,
         IVotes _token,
         uint _targetSecondsPerBlock
-    ) NonblockingLzApp(_endpoint) {
+    ) NonblockingLzApp(_endpoint) payable {
         hubChain = _hubChain;
         token = _token;
         targetSecondsPerBlock = _targetSecondsPerBlock;
@@ -134,12 +134,18 @@ contract VoteAggregator is NonblockingLzApp {
                 _refundAddress: payable(address(this)),
                 _zroPaymentAddress: address(0x0),
                 _adapterParams: bytes(""),
-                _nativeFee: 0.1 ether
+                // NOTE: VoteAggregator needs to be funded beforehand, in the constructor.
+                //       There are better solutions, such as cross-chain swaps being built in from the hub chain, but
+                //       this is the easiest solution for demonstration purposes.
+                _nativeFee: 0.1 ether 
             });
             emit SendingQuorumDataToHub(proposalId, votes.forVotes, votes.againstVotes, votes.abstainVotes);
         }
         // TODO: 2. Implement voting cancelation (out of scope for tutorial)
     }
+
+    // Explicitly mark the contract as payable so that additional cross-chain gas & transaction refunds can occur
+    receive() external payable { }
 
     // The following code is copied from the Governor modules to replicate some of its logic
 

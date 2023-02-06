@@ -67,6 +67,14 @@ task("newEmptyProposal",
     "the description of the empty proposal"
 );
 
+task("execute",
+    "Executes a proposal on the hub chain, generated from the empty proposal.",
+    require("./executeProposal")
+).addParam(
+    "desc",
+    "the description of the empty proposal"
+);
+
 task("vote",
     "Votes on a proposal.",
     require("./vote")

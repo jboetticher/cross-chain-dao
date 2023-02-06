@@ -42,7 +42,7 @@ abstract contract CrossChainGovernorCountingSimple is Governor {
     uint16[] public spokeChains;
 
     // Local (hub-chain) voting data
-    mapping(uint256 => ProposalVote) private _proposalVotes;
+    mapping(uint256 => ProposalVote) public _proposalVotes;
 
     // Whether or not the DAO finished the collection phase. It would be more efficient to add Collection as a status
     // in the Governor interface, but that would require editing the source file. It is a bit out of scope to completely
@@ -51,7 +51,7 @@ abstract contract CrossChainGovernorCountingSimple is Governor {
     mapping(uint256 => bool) internal collectionStarted;
 
     // Maps to a list of summarized spoke voting data
-    mapping(uint256 => mapping(uint16 => SpokeProposalVote)) spokeVotes;
+    mapping(uint256 => mapping(uint16 => SpokeProposalVote)) public spokeVotes;
 
     /**
      * @dev See {IGovernor-COUNTING_MODE}.
