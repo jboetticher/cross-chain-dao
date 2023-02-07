@@ -102,11 +102,6 @@ abstract contract CrossChainGovernorCountingSimple is Governor {
         return quorum(proposalSnapshot(proposalId)) <= forVotes + abstainVotes;
     }
 
-    // Returns the quorum for a block number, in terms of number of votes. To simplify things, we're keeping quorum at a single token.
-    function quorum(uint256) override virtual public view returns (uint256) {
-        return 1 ether;
-    }
-
     /**
      * @dev See {Governor-_voteSucceeded}. In this module, the forVotes must be strictly over the againstVotes.
      */

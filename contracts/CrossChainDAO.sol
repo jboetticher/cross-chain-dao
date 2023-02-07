@@ -218,6 +218,11 @@ contract CrossChainDAO is
         revert("Use cross-chain propose!");
     }
 
+    // Returns the quorum for a block number, in terms of number of votes. To simplify things, we're keeping quorum at a single token.
+    function quorum(uint256) public pure override returns (uint256) {
+        return 1 ether;
+    }
+
     // =========================================================================================================
     //                        The following functions are overrides required by Solidity
     // =========================================================================================================
@@ -243,15 +248,6 @@ contract CrossChainDAO is
         returns (uint256)
     {
         return super.votingPeriod();
-    }
-
-    function quorum(uint256 blockNumber)
-        public
-        view
-        override(CrossChainGovernorCountingSimple, IGovernor)
-        returns (uint256)
-    {
-        return super.quorum(blockNumber);
     }
 
     function proposalThreshold()
