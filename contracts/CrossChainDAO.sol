@@ -4,9 +4,9 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/governance/Governor.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
+import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@layerzerolabs/solidity-examples/contracts/lzApp/NonblockingLzApp.sol";
-import "./CrossChain/CrossChainGovernorVotes.sol";
-import "./CrossChain/CrossChainGovernorCountingSimple.sol";
+import "./CrossChainGovernorCountingSimple.sol";
 
 /* 
 
@@ -30,13 +30,11 @@ contract if interested.
 
 */
 
-// TODO: figure out why the contracts compiled into something so massive
-
 contract CrossChainDAO is
     Governor,
     GovernorSettings,
     CrossChainGovernorCountingSimple,
-    CrossChainGovernorVotes,
+    GovernorVotes,
     NonblockingLzApp
 {
     constructor(
@@ -50,7 +48,7 @@ contract CrossChainDAO is
             30, /* 30 block voting period */
             0 /* 0 block proposal threshold */
         )
-        CrossChainGovernorVotes(_token)
+        GovernorVotes(_token)
         NonblockingLzApp(lzEndpoint)
     {
         spokeChains = _spokeChains;
