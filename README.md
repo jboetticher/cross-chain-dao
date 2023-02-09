@@ -1,6 +1,6 @@
 # Example Cross-Chain DAO
 This is an example of a cross-chain DAO. It follows a hub-and-spoke model.  
-The `CrossChainDAO.sol` file is the main logic. The `DAOSatellite.sol` contract communicates across chains with the `CrossChainDAO.sol` smart contract.  
+The `CrossChainDAO.sol` file is the main logic. The `VotesAggregator.sol` contract communicates across chains with the `CrossChainDAO.sol` smart contract.  
 
 ## Design
 The original process of a DAO (OpenZeppelin contract inspired by Compound) would have the following steps:  

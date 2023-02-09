@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "./OFTVotes.sol";
-
-// TODO: figure out why the contracts compiled into something so massive
 
 contract CrossChainDAOToken is OFTVotes {
     constructor(uint256 _initialSupply, address _lzEndpoint)

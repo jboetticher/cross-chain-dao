@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@axelar-network/axelar-cgp-solidity": "^4.3.1",
+    "@layerzerolabs/solidity-examples": "^0.0.8",
     "@openzeppelin/contracts": "^4.8.0",
     "@openzeppelin/contracts-upgradeable": "^4.8.0",
     "hardhat-deploy-ethers": "^0.3.0-beta.13",
