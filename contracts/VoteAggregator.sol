@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./LayerZero/lzApp/NonblockingLzApp.sol";
+import "@layerzerolabs/solidity-examples/contracts/lzApp/NonblockingLzApp.sol";
 import "@openzeppelin/contracts/utils/Timers.sol";
 import "@openzeppelin/contracts/utils/Checkpoints.sol";
 import "@openzeppelin/contracts/governance/utils/IVotes.sol";
