@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
 
 // This contract doesn't adhere to a lot of the interfaces provided by IGovernor and its modules
-contract VoteAggregator is NonblockingLzApp {
+contract DAOSatellite is NonblockingLzApp {
     using Checkpoints for Checkpoints.History;
 
     event RemoteProposalReceived(uint256 id, uint256 localVoteStart);
@@ -57,11 +57,11 @@ contract VoteAggregator is NonblockingLzApp {
         RemoteProposal storage proposal = proposals[proposalId];
         require(
             !proposal.voteFinished,
-            "VoteAggregator: vote not currently active"
+            "DAOSatellite: vote not currently active"
         );
         require(
             isProposal(proposalId), 
-            "VoteAggregator: not a started vote"
+            "DAOSatellite: not a started vote"
         );
 
         uint256 weight = _getVotes(
@@ -134,7 +134,7 @@ contract VoteAggregator is NonblockingLzApp {
                 _refundAddress: payable(address(this)),
                 _zroPaymentAddress: address(0x0),
                 _adapterParams: bytes(""),
-                // NOTE: VoteAggregator needs to be funded beforehand, in the constructor.
+                // NOTE: DAOSatellite needs to be funded beforehand, in the constructor.
                 //       There are better solutions, such as cross-chain swaps being built in from the hub chain, but
                 //       this is the easiest solution for demonstration purposes.
                 _nativeFee: 0.1 ether 

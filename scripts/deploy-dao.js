@@ -8,7 +8,7 @@ const hre = require("hardhat");
 
 async function main() {
   // Deploy the cross-chain token 
-  const VoteAggregator = await hre.ethers.getContractFactory("VoteAggregator");
+  const DAOSatellite = await hre.ethers.getContractFactory("DAOSatellite");
   const hundredTokens = hre.ethers.utils.parseEther("100");
   const token = await CrossChainDAOToken.deploy(hundredTokens);
   console.log("CrossChainDAOToken deployed to: " + token.address);

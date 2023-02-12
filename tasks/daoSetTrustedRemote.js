@@ -3,7 +3,7 @@ const { getDeploymentAddresses } = require("../utils/readStatic")
 
 module.exports = async function (taskArgs, hre) {
     const dstChainId = CHAIN_ID[taskArgs.targetNetwork]
-    const dstAddr = getDeploymentAddresses(taskArgs.targetNetwork)["VoteAggregator"]
+    const dstAddr = getDeploymentAddresses(taskArgs.targetNetwork)["DAOSatellite"]
 
     // get local contract instance
     const dao = await ethers.getContract("CrossChainDAO");
@@ -18,5 +18,5 @@ module.exports = async function (taskArgs, hre) {
 
 // HEY YOU YEAH YOU IN THE FUTURE
 
-// CHECK THE FANTOM VOTEAGGREGATOR TO SEE IF 
+// CHECK THE FANTOM DAOSatellite TO SEE IF 
 // PROPOSAL WAS RECEIVED PROPERLY

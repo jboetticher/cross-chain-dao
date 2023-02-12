@@ -12,8 +12,8 @@ module.exports = async function (taskArgs, hre) {
     }
     else {
         // Get local contract instance
-        const dao = await ethers.getContract("VoteAggregator")
-        console.log(`[source] VoteAggregator.address: ${dao.address}`);
+        const dao = await ethers.getContract("DAOSatellite")
+        console.log(`[source] DAOSatellite.address: ${dao.address}`);
 
         // Delegate votes to task args
         let hasVoted = await dao.hasVoted(proposalid, acc);

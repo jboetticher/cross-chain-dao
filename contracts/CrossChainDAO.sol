@@ -50,9 +50,8 @@ contract CrossChainDAO is
         )
         GovernorVotes(_token)
         NonblockingLzApp(lzEndpoint)
-    {
-        spokeChains = _spokeChains;
-    }
+        CrossChainGovernorCountingSimple(_spokeChains)
+    {}
 
     event LzAppToSendThisPayload(bytes);
 
@@ -72,7 +71,7 @@ contract CrossChainDAO is
 
         // Some options for cross-chain actions are: propose, vote, vote with reason, vote with reason and params, cancel, etc...
         if (option == 0) {
-            onReceiveExternalVotingData(_srcChainId, payload);
+            onReceiveSpokeVotingData(_srcChainId, payload);
         } else if (option == 1) {
             // TODO: Feel free to put your own cross-chain actions (propose, execute, etc)...
         } else {
@@ -80,7 +79,7 @@ contract CrossChainDAO is
         }
     }
 
-    function onReceiveExternalVotingData(
+    function onReceiveSpokeVotingData(
         uint16 _srcChainId,
         bytes memory payload
     ) internal virtual {
@@ -117,13 +116,7 @@ contract CrossChainDAO is
             "Collection phase for this proposal is unfinished!"
         );
 
-        super._beforeExecute(
-            proposalId,
-            targets,
-            values,
-            calldatas,
-            descriptionHash
-        );
+        super._beforeExecute(proposalId, targets, values, calldatas, descriptionHash);
     }
 
     // Requests the voting data from all of the spoke chains

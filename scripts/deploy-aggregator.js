@@ -19,8 +19,8 @@ async function main() {
   let lzAddress = addresses[hre.getChainId()];
 
   // Deploy the aggregator
-  const VoteAggregator = await hre.ethers.getContractFactory("VoteAggregator");
-  const dao = await VoteAggregator.deploy(10126, lzAddress, token); // fantom + avalanche
+  const DAOSatellite = await hre.ethers.getContractFactory("DAOSatellite");
+  const dao = await DAOSatellite.deploy(10126, lzAddress, token); // fantom + avalanche
   console.log("CrossChainDAO deployed to: " + dao.address);
 }
 

@@ -15,10 +15,10 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
     const hubChain = CHAIN_IDS.moonbase;
     const args = [hubChain, lzEndpointAddress, voteToken, TARGET_SECONDS_PER_BLOCK[getNetworkName()]];
 
-    console.log(`Deploying VoteAggregator on ${getNetworkName()} with ${deployer}...`);
+    console.log(`Deploying DAOSatellite on ${getNetworkName()} with ${deployer}...`);
 
     try {
-        const deployment = await deploy("VoteAggregator", {
+        const deployment = await deploy("DAOSatellite", {
             from: deployer,
             args,
             log: true,
@@ -45,4 +45,4 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
     }
 }
 
-module.exports.tags = ["VoteAggregator"]
+module.exports.tags = ["DAOSatellite"]

@@ -12,6 +12,10 @@ import "@openzeppelin/contracts/governance/Governor.sol";
  */
 abstract contract CrossChainGovernorCountingSimple is Governor {
 
+    constructor(uint16[] memory _spokeChains) {
+        spokeChains = _spokeChains;
+    }
+
     /**
      * @dev Supported vote types. Matches Governor Bravo ordering.
      */
@@ -42,7 +46,7 @@ abstract contract CrossChainGovernorCountingSimple is Governor {
     uint16[] public spokeChains;
 
     // Local (hub-chain) voting data
-    mapping(uint256 => ProposalVote) public _proposalVotes;
+    mapping(uint256 => ProposalVote) private _proposalVotes;
 
     // Whether or not the DAO finished the collection phase. It would be more efficient to add Collection as a status
     // in the Governor interface, but that would require editing the source file. It is a bit out of scope to completely

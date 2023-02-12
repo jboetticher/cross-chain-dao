@@ -14,9 +14,9 @@ task("tokenSetTrustedRemote",
     "the targetNetwork to set as trusted"
 );
 
-task("voteAggSetTrustedRemote",
-    "Set up the trusted remote addresses for a VoteAggregator.",
-    require("./voteAggSetTrustedRemote")
+task("satelliteSetTrustedRemote",
+    "Set up the trusted remote addresses for a DAOSatellite.",
+    require("./satelliteSetTrustedRemote")
 );
 
 task("readTokenData", 
@@ -43,9 +43,9 @@ task("readProposalData",
     "the proposalid to read"
 );
 
-task("readVoteAggData", 
+task("readSatelliteData", 
     "Reads data about a proposal on the vote aggregator.",
-    require("./readVoteAggData")
+    require("./readSatelliteData")
 ).addParam(
     "proposalid",
     "the proposalid to read"

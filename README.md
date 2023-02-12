@@ -44,22 +44,22 @@ npx hardhat delegateVotes --network -node --acc 0x6Be02d1d3665660d22FF9624b7BE05
 ```
 
 ### CrossChainDAO
-This only needs to be deployed once, since it expects to communicate with VoteAggregator contracts.  
+This only needs to be deployed once, since it expects to communicate with DAOSatellite contracts.  
 
 ```
 npx hardhat deploy --tags CrossChainDAO --network moonbase
 ```
 
-The setting trusted contracts section happens after deploying the VoteAggregator contracts.  
+The setting trusted contracts section happens after deploying the DAOSatellite contracts.  
 
-### VoteAggregator
-Now you ought to deploy the VoteAggregator smart contracts on the hub chains.  
+### DAOSatellite
+Now you ought to deploy the DAOSatellite smart contracts on the hub chains.  
 
 ```
-npx hardhat deploy --tags VoteAggregator --network fantom-testnet
+npx hardhat deploy --tags DAOSatellite --network fantom-testnet
 ```
 
-Now both the DAO and the satellite VoteAggregators have to have their remote addresses trusted.  
+Now both the DAO and the satellite DAOSatellites have to have their remote addresses trusted.  
 
 ```
 npx hardhat daoSetTrustedRemote --network moonbase --target-network fantom-testnet
