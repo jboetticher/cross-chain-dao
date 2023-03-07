@@ -83,15 +83,15 @@ contract DAOSatellite is NonblockingLzApp {
     ) internal override {
         require(_srcChainId == hubChain, "Only messages from the hub chain can be received!");
 
-        (uint256 option, bytes memory payload) = abi.decode(
-            _payload,
-            (uint256, bytes)
-        );
+        uint16 option;
+        assembly {
+            option := mload(add(_payload, 32))
+        }
 
         // Do 1 of 2 things:
         // 0. Begin a proposal on the local chain, with local block times
         if (option == 0) {
-            (uint256 proposalId, uint256 proposalStart) = abi.decode(payload, (uint256, uint256));
+            (, uint256 proposalId, uint256 proposalStart) = abi.decode(_payload, (uint16, uint256, uint256));
             require(!isProposal(proposalId), "Proposal ID must be unique.");
 
             // Snapshot cut-off estimation
@@ -118,11 +118,10 @@ contract DAOSatellite is NonblockingLzApp {
         }
         // 1. Send vote results back to the local chain
         else if (option == 1) {
-            uint256 proposalId = abi.decode(payload, (uint256));
+            (, uint256 proposalId) = abi.decode(_payload, (uint16, uint256));
             ProposalVote storage votes = proposalVotes[proposalId];
             bytes memory votingPayload = abi.encode(
-                0, 
-                abi.encode(proposalId, votes.forVotes, votes.againstVotes, votes.abstainVotes)
+                uint16(0), proposalId, votes.forVotes, votes.againstVotes, votes.abstainVotes
             );
             _lzSend({
                 _dstChainId: hubChain,

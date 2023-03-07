@@ -64,14 +64,14 @@ contract CrossChainDAO is
         uint64, /*_nonce*/
         bytes memory _payload
     ) internal override {
-        (uint256 option, bytes memory payload) = abi.decode(
-            _payload,
-            (uint16, bytes)
-        );
+        uint16 option;
+        assembly {
+            option := mload(add(_payload, 32))
+        }
 
         // Some options for cross-chain actions are: propose, vote, vote with reason, vote with reason and params, cancel, etc...
         if (option == 0) {
-            onReceiveSpokeVotingData(_srcChainId, payload);
+            onReceiveSpokeVotingData(_srcChainId, _payload);
         } else if (option == 1) {
             // TODO: Feel free to put your own cross-chain actions (propose, execute, etc)...
         } else {
@@ -79,16 +79,17 @@ contract CrossChainDAO is
         }
     }
 
-    function onReceiveSpokeVotingData(
-        uint16 _srcChainId,
-        bytes memory payload
-    ) internal virtual {
+    function onReceiveSpokeVotingData(uint16 _srcChainId, bytes memory payload)
+        internal
+        virtual
+    {
         (
+            ,
             uint256 _proposalId,
             uint256 _pro,
             uint256 _against,
             uint256 _abstain
-        ) = abi.decode(payload, (uint256, uint256, uint256, uint256));
+        ) = abi.decode(payload, (uint16, uint256, uint256, uint256, uint256));
         if (spokeVotes[_proposalId][_srcChainId].initialized) {
             revert("Already initialized!");
         } else {
@@ -116,7 +117,13 @@ contract CrossChainDAO is
             "Collection phase for this proposal is unfinished!"
         );
 
-        super._beforeExecute(proposalId, targets, values, calldatas, descriptionHash);
+        super._beforeExecute(
+            proposalId,
+            targets,
+            values,
+            calldatas,
+            descriptionHash
+        );
     }
 
     // Requests the voting data from all of the spoke chains
@@ -136,7 +143,7 @@ contract CrossChainDAO is
         // it is their cue to send data back
         uint256 crossChainFee = msg.value / spokeChains.length;
         for (uint16 i = 0; i < spokeChains.length; i++) {
-            bytes memory payload = abi.encode(1, abi.encode(proposalId));
+            bytes memory payload = abi.encode(uint16(1), proposalId);
             _lzSend({
                 _dstChainId: spokeChains[i],
                 _payload: payload,
@@ -180,8 +187,9 @@ contract CrossChainDAO is
             uint256 crossChainFee = msg.value / spokeChains.length;
             for (uint16 i = 0; i < spokeChains.length; i++) {
                 bytes memory payload = abi.encode(
-                    0,
-                    abi.encode(proposalId, block.timestamp)
+                    uint16(0),
+                    proposalId,
+                    block.timestamp
                 );
 
                 emit LzAppToSendThisPayload(payload);
