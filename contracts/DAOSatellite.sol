@@ -32,7 +32,6 @@ contract DAOSatellite is NonblockingLzApp {
     uint16 public immutable hubChain;
     IVotes public immutable token;
     uint256 public immutable targetSecondsPerBlock;
-    uint256 private _quorumNumerator; // DEPRECATED
     mapping(uint256 => RemoteProposal) public proposals;
     mapping(uint256 => ProposalVote) public proposalVotes;
 
@@ -64,10 +63,7 @@ contract DAOSatellite is NonblockingLzApp {
             "DAOSatellite: not a started vote"
         );
 
-        uint256 weight = _getVotes(
-            msg.sender,
-            proposal.localVoteStart
-        );
+        uint256 weight = token.getPastVotes(msg.sender, proposal.localVoteStart);
         _countVote(proposalId, msg.sender, support, weight);
 
         // You could add event emitters here like in the original implementation
@@ -138,7 +134,8 @@ contract DAOSatellite is NonblockingLzApp {
                 //       There are better solutions, such as cross-chain swaps being built in from the hub chain, but
                 //       this is the easiest solution for demonstration purposes.
                 _nativeFee: 0.1 ether 
-            });
+            });            
+            proposals[proposalId].voteFinished = true;
             emit SendingQuorumDataToHub(proposalId, votes.forVotes, votes.againstVotes, votes.abstainVotes);
         }
         // TODO: 2. Implement voting cancelation (out of scope for tutorial)
@@ -148,16 +145,6 @@ contract DAOSatellite is NonblockingLzApp {
     receive() external payable { }
 
     // The following code is copied from the Governor modules to replicate some of its logic
-
-    /**
-     * Read the voting weight from the token's built in snapshot mechanism (see {Governor-_getVotes}).
-     */
-    function _getVotes(
-        address account,
-        uint256 blockNumber
-    ) internal view virtual returns (uint256) {
-        return token.getPastVotes(account, blockNumber);
-    }
 
     struct ProposalVote {
         uint256 againstVotes;
@@ -183,7 +170,7 @@ contract DAOSatellite is NonblockingLzApp {
     ) internal virtual {
         ProposalVote storage proposalVote = proposalVotes[proposalId];
 
-        require(!proposalVote.hasVoted[account], "GovernorVotingSimple: vote already cast");
+        require(!proposalVote.hasVoted[account], "DAOSatellite: vote already cast");
         proposalVote.hasVoted[account] = true;
 
         if (support == uint8(VoteType.Against)) {
@@ -193,7 +180,7 @@ contract DAOSatellite is NonblockingLzApp {
         } else if (support == uint8(VoteType.Abstain)) {
             proposalVote.abstainVotes += weight;
         } else {
-            revert("GovernorVotingSimple: invalid value for enum VoteType");
+            revert("DAOSatellite: invalid value for enum VoteType");
         }
     }
 

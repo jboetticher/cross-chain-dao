@@ -127,7 +127,7 @@ contract CrossChainDAO is
         );
         require(
             !collectionStarted[proposalId],
-            "Collection phase for this proposal has already finished!"
+            "Collection phase for this proposal has already started!"
         );
 
         collectionStarted[proposalId] = true;
