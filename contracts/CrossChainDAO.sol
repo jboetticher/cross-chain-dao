@@ -126,6 +126,12 @@ contract CrossChainDAO is
         );
     }
 
+    // Whether or not the DAO finished the collection phase. It would be more efficient to add Collection as a status
+    // in the Governor interface, but that would require editing the source file. It is a bit out of scope to completely
+    // refactor the OpenZeppelin governance contract for cross-chain action!
+    mapping(uint256 => bool) internal collectionFinished;
+    mapping(uint256 => bool) internal collectionStarted;
+
     // Requests the voting data from all of the spoke chains
     function requestCollections(uint256 proposalId) public payable {
         require(

@@ -48,12 +48,6 @@ abstract contract CrossChainGovernorCountingSimple is Governor {
     // Local (hub-chain) voting data
     mapping(uint256 => ProposalVote) private _proposalVotes;
 
-    // Whether or not the DAO finished the collection phase. It would be more efficient to add Collection as a status
-    // in the Governor interface, but that would require editing the source file. It is a bit out of scope to completely
-    // refactor the OpenZeppelin governance contract for cross-chain action!
-    mapping(uint256 => bool) internal collectionFinished;
-    mapping(uint256 => bool) internal collectionStarted;
-
     // Maps to a list of summarized spoke voting data
     mapping(uint256 => mapping(uint16 => SpokeProposalVote)) public spokeVotes;
 
